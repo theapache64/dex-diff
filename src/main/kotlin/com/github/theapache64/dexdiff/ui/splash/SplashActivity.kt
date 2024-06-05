@@ -1,9 +1,11 @@
 package com.github.theapache64.dexdiff.ui.splash
 
 import com.github.theapache64.dexdiff.app.App
+import com.github.theapache64.dexdiff.data.local.AppArgs
 import com.github.theapache64.dexdiff.ui.home.HomeActivity
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
+import java.io.File
 import javax.inject.Inject
 
 class SplashActivity : Activity() {
@@ -28,8 +30,14 @@ class SplashActivity : Activity() {
             }
 
             goToHome.observe { splashMsg ->
+
                 startActivity(
-                    intent = HomeActivity.getStartIntent(splashMsg)
+                    intent = HomeActivity.getStartIntent(
+                        appArgs = AppArgs(
+                            beforeApk = File(App.args?.getOrNull(0) ?: error("Before APK is missing")),
+                            afterApk = File(App.args?.getOrNull(1) ?: error("After APK is missing"))
+                        )
+                    )
                 )
             }
         }
