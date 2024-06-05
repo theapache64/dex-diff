@@ -15,15 +15,11 @@ class App : Application() {
         lateinit var di: AppComponent
     }
 
-    @Inject
-    lateinit var appController: AppController
 
     override fun onCreate() {
         super.onCreate()
         di = DaggerAppComponent.create()
         di.inject(this)
-
-        appController.onArgs(args)
 
         val splashIntent = SplashActivity.getStartIntent()
         startActivity(splashIntent)

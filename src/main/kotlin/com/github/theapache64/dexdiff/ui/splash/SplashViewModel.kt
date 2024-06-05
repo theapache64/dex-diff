@@ -15,13 +15,13 @@ class SplashViewModel @Inject constructor(
     private val _welcomeMsg = MutableLiveData<String>()
     val welcomeMsg: LiveData<String> = _welcomeMsg
 
-    private val _goToHome = MutableLiveData<String>()
-    val goToHome: LiveData<String> = _goToHome
+    private val _goToHome = MutableLiveData<Boolean>()
+    val goToHome: LiveData<Boolean> = _goToHome
 
     init {
         val splashMsg = "⚔️ dex-diff v$VERSION"
         _welcomeMsg.value = splashMsg
-        _goToHome.value = splashMsg
+        _goToHome.value = true
     }
 
 

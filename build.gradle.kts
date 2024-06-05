@@ -8,6 +8,7 @@ group = "com.github.theapache64.dexdiff"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    google()
     mavenCentral()
     maven {
         url = uri("https://jitpack.io")
@@ -24,8 +25,15 @@ dependencies {
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 
+    // JadX
+    val jadxVersion = "1.5.0"
+    implementation("io.github.skylot:jadx-core:$jadxVersion")
+    implementation("io.github.skylot:jadx-dex-input:$jadxVersion")
+    implementation("io.github.skylot:jadx-java-input:$jadxVersion")
+
     // Test deps
     testImplementation(kotlin("test"))
+    testImplementation("com.github.theapache64:expekt:1.0.0")
 }
 
 tasks.test {

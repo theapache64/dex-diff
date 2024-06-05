@@ -29,16 +29,12 @@ class SplashActivity : Activity() {
                 println(it)
             }
 
-            goToHome.observe { splashMsg ->
-
-                startActivity(
-                    intent = HomeActivity.getStartIntent(
-                        appArgs = AppArgs(
-                            beforeApk = File(App.args?.getOrNull(0) ?: error("Before APK is missing")),
-                            afterApk = File(App.args?.getOrNull(1) ?: error("After APK is missing"))
-                        )
+            goToHome.observe { shouldGo ->
+                if(shouldGo){
+                    startActivity(
+                        intent = HomeActivity.getStartIntent()
                     )
-                )
+                }
             }
         }
 

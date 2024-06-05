@@ -1,24 +1,29 @@
 package com.github.theapache64.dexdiff.ui.home
 
+import com.github.theapache64.dexdiff.app.App
 import com.github.theapache64.dexdiff.data.local.AppArgs
+import com.github.theapache64.dexdiff.ui.splash.SplashViewModel
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
+import javax.inject.Inject
 
 class HomeActivity : Activity() {
+
+    @Inject
+    lateinit var viewModel: HomeViewModel
+
     companion object {
-
-        private const val KEY_APP_ARGS = "app_args"
-
-        fun getStartIntent(appArgs: AppArgs): Intent {
-            return Intent(HomeActivity::class).apply {
-                putExtra(KEY_APP_ARGS, appArgs)
-            }
+        fun getStartIntent(): Intent {
+            return Intent(HomeActivity::class)
         }
     }
 
     override fun onCreate() {
         super.onCreate()
-        val appArgs = intent.data[KEY_APP_ARGS] as AppArgs
-        println("App Args is $appArgs")
+        App.di.inject(this)
+
+        viewModel.status.observe { msg ->
+            println(msg)
+        }
     }
 }
