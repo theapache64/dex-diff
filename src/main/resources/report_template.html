@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <!--Bootstrap-->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    </head>
+    <body>
+        <div class="container">
+            <h1>Dex Diff Report</h1>
+
+            <h3>Summary</h3>
+            <!--APK details in table -->
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Before</th>
+                        <th>After</th>
+                        <th>Diff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>APK size</td>
+                        <td>{{beforeApkSize}}</td>
+                        <td>{{afterApkSize}}</td>
+                        <td>{{diffApkSize}}</td>
+                    </tr>
+                    <tr>
+                        <td>Total files</td>
+                        <td>{{beforeTotalFiles}}</td>
+                        <td>{{afterTotalFiles}}</td>
+                        <td>{{diffTotalFiles}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total classes</td>
+                        <td>{{beforeTotalClasses}}</td>
+                        <td>{{afterTotalClasses}}</td>
+                        <td>{{diffTotalClasses}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total methods</td>
+                        <td>{{beforeTotalMethods}}</td>
+                        <td>{{afterTotalMethods}}</td>
+                        <td>{{diffTotalMethods}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!--New files-->
+            <h3>New files</h3>
+            {{newFilesTable}}
+
+            <!--Removed files-->
+            <h3>Removed files</h3>
+            {{removedFilesTable}}
+
+            <!--Changed files-->
+            <h3>Changed files</h3>
+            {{changedFilesTable}}
+
+            <!--Dex Change-->
+
+
+        </div>
+    </body>
+</html>

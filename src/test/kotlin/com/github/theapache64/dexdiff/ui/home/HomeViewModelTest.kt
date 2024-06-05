@@ -10,8 +10,8 @@ class HomeViewModelTest {
     @Test
     fun `Normal flow`() {
         App.args = arrayOf(
-            "src/test/resources/with-fullmode.apk",
-            "src/test/resources/without-fullmode.apk"
+            "src/test/resources/without-fullmode.apk",
+            "src/test/resources/with-fullmode.apk"
         )
 
         val actualStatuses = mutableListOf<String>()
