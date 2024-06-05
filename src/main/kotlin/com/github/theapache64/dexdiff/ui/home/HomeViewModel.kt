@@ -59,10 +59,15 @@ class HomeViewModel @Inject constructor(
         println("QuickTag: HomeViewModel:: deleted files count: ${removedFiles.size}")
         println("QuickTag: HomeViewModel:: done")
 
-        val beforeTotalFrameworkFiles = findFrameworkFiles(beforeFiles).size
+        val frameworkFiles = findFrameworkFiles(beforeFiles)
+        val beforeTotalFrameworkFiles = frameworkFiles.size
         val afterTotalFrameworkFiles = findFrameworkFiles(afterFiles).size
-        val beforeTotalAppFiles = findAppFiles(beforeFiles).size
+        val appFiles = findAppFiles(beforeFiles)
+        val beforeTotalAppFiles = appFiles.size
         val afterTotalAppFiles = findAppFiles(afterFiles).size
+
+        val changedFrameworkFiles = findContentChangedFiles(frameworkFiles, afterReport.decompiledDir.generatedDirName())
+        val changedAppFiles = findContentChangedFiles(appFiles, afterReport.decompiledDir.generatedDirName())
 
         ReportMaker(
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
@@ -88,8 +93,24 @@ class HomeViewModel @Inject constructor(
             removedFrameworkFiles = findFrameworkFiles(removedFiles),
 
             newAppFiles = findAppFiles(newFiles),
-            removedAppFiles = findAppFiles(removedFiles)
+            removedAppFiles = findAppFiles(removedFiles),
+
+            changedFrameworkFiles = changedFrameworkFiles,
+            changedAppFiles = changedAppFiles
         ).make()
+    }
+
+    private fun findContentChangedFiles(beforeFiles: List<File>, afterSrcDirName : String): List<Pair<File, File>> {
+        val changedFiles = mutableListOf<Pair<File, File>>()
+        beforeFiles.forEach { beforeFile ->
+            val afterFile =  File("temp/$afterSrcDirName/sources/${beforeFile.relativeAndroidPath()}")
+            if(afterFile.exists()){
+                if (beforeFile.readText() != afterFile.readText()) {
+                    changedFiles.add(beforeFile to afterFile)
+                }
+            }
+        }
+        return changedFiles
     }
 
 
@@ -123,4 +144,8 @@ class HomeViewModel @Inject constructor(
         return this.absolutePath.split("-decompiled/sources/").last()
     }
 
+}
+
+private fun File.generatedDirName(): String {
+    return this.absolutePath.split("temp/")[1].split("/")[0]
 }

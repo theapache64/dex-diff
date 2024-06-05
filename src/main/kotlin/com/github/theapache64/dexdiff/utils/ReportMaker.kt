@@ -27,7 +27,10 @@ class ReportMaker(
     private val removedFrameworkFiles: List<File>,
 
     private val newAppFiles : List<File>,
-    private val removedAppFiles : List<File>
+    private val removedAppFiles : List<File>,
+
+    private val changedFrameworkFiles : List<Pair<File, File>>,
+    private val changedAppFiles : List<Pair<File, File>>
 ) {
 
 
@@ -39,7 +42,9 @@ class ReportMaker(
         )
 
         val frameworkNote = "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+        val frameworkChangedNote = "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
         val appNote = "These are classes NOT inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+        val appChangedNote = "These are classes NOT inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
 
         val fullReport = reportFile.readText()
             .addReportSummary()
@@ -63,6 +68,16 @@ class ReportMaker(
                 note = appNote,
                 key = "removedAppFilesTable"
             )
+            .add(
+                files = changedFrameworkFiles.map { it.first },
+                note = frameworkChangedNote,
+                key = "changedFrameworkFilesTable"
+            )
+            .add(
+                files = changedAppFiles.map { it.first },
+                note = appChangedNote,
+                key = "changedAppFilesTable"
+            )
 
         reportFile.writeText(fullReport)
     }
@@ -73,16 +88,16 @@ class ReportMaker(
             .replace("{{afterApkSize}}", "$afterApkSizeInKb KB")
             .replace("{{diffApkSize}}", "${(afterApkSizeInKb - beforeApkSizeInKb).withSymbol()} KB")
 
-            .replace("{{beforeTotalFiles}}", "$beforeTotalFiles")
-            .replace("{{afterTotalFiles}}", "$afterTotalFiles")
+            .replace("{{beforeTotalFiles}}", "$beforeTotalFiles (100%)")
+            .replace("{{afterTotalFiles}}", "$afterTotalFiles (100%)")
             .replace("{{diffTotalFiles}}", "${(afterTotalFiles - beforeTotalFiles).withSymbol()} files")
 
-            .replace("{{beforeTotalFrameworkFiles}}", "$beforeTotalFrameworkFiles (${(beforeTotalFiles )}%)")
-            .replace("{{afterTotalFrameworkFiles}}", "$afterTotalFrameworkFiles")
+            .replace("{{beforeTotalFrameworkFiles}}", "$beforeTotalFrameworkFiles (${((beforeTotalFrameworkFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{afterTotalFrameworkFiles}}", "$afterTotalFrameworkFiles (${((afterTotalFrameworkFiles / afterTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
             .replace("{{diffTotalFrameworkFiles}}", "${(afterTotalFrameworkFiles - beforeTotalFrameworkFiles).withSymbol()} files")
 
-            .replace("{{beforeTotalAppFiles}}", "$beforeTotalAppFiles")
-            .replace("{{afterTotalAppFiles}}", "$afterTotalAppFiles")
+            .replace("{{beforeTotalAppFiles}}", "$beforeTotalAppFiles (${((beforeTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{afterTotalAppFiles}}", "$afterTotalAppFiles (${((afterTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
             .replace("{{diffTotalAppFiles}}", "${(afterTotalAppFiles - beforeTotalAppFiles).withSymbol()} files")
 
             .replace("{{beforeTotalClasses}}", "$beforeTotalClasses")
@@ -92,6 +107,8 @@ class ReportMaker(
             .replace("{{beforeTotalMethods}}", "$beforeTotalMethods")
             .replace("{{afterTotalMethods}}", "$afterTotalMethods")
             .replace("{{diffTotalMethods}}", "${(afterTotalMethods - beforeTotalMethods).withSymbol()} methods")
+
+            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size} files")
     }
 
 
@@ -141,7 +158,13 @@ class ReportMaker(
         }
     }
 
+
+    private fun Float.roundToTwoDecimals(): String {
+        return String.format("%.2f", this)
+    }
+
 }
+
 
 
 
