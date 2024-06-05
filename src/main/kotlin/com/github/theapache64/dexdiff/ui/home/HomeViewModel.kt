@@ -16,10 +16,19 @@ class HomeViewModel @Inject constructor(
     companion object {
         const val INIT_MSG = "➡️ initialising..."
         const val DONE_MSG = "✅ Done"
+
+        val FRAMEWORK_PACKAGES = listOf(
+            "androidx/",
+            "android/",
+            "kotlinx/",
+            "kotlin/",
+            "java/",
+        )
     }
 
     private val _status = MutableLiveData<String>()
     val status: LiveData<String> = _status
+
 
     init {
         _status.value = INIT_MSG
@@ -44,11 +53,16 @@ class HomeViewModel @Inject constructor(
         println("QuickTag: HomeViewModel:: beforeFiles count : ${beforeFiles.size}")
         println("QuickTag: HomeViewModel:: afterFiles count : ${afterFiles.size}")
         println("QuickTag: HomeViewModel:: comparing")
-        val newFiles = findNewOrDeletedFiles(beforeFiles, afterFiles)
-        val deletedFiles = findNewOrDeletedFiles(afterFiles, beforeFiles)
+        val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
+        val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)
         println("QuickTag: HomeViewModel:: new files count: ${newFiles.size}")
-        println("QuickTag: HomeViewModel:: deleted files count: ${deletedFiles.size}")
+        println("QuickTag: HomeViewModel:: deleted files count: ${removedFiles.size}")
         println("QuickTag: HomeViewModel:: done")
+
+        val beforeTotalFrameworkFiles = findFrameworkFiles(beforeFiles).size
+        val afterTotalFrameworkFiles = findFrameworkFiles(afterFiles).size
+        val beforeTotalAppFiles = findAppFiles(beforeFiles).size
+        val afterTotalAppFiles = findAppFiles(afterFiles).size
 
         ReportMaker(
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
@@ -57,27 +71,34 @@ class HomeViewModel @Inject constructor(
             beforeTotalFiles = beforeFiles.size,
             afterTotalFiles = afterFiles.size,
 
+            beforeTotalFrameworkFiles = beforeTotalFrameworkFiles,
+            afterTotalFrameworkFiles = afterTotalFrameworkFiles,
+
+            beforeTotalAppFiles = beforeTotalAppFiles,
+            afterTotalAppFiles = afterTotalAppFiles,
+
+
             beforeTotalClasses = beforeReport.totalClasses,
             afterTotalClasses = afterReport.totalClasses,
 
             beforeTotalMethods = beforeReport.totalMethods,
             afterTotalMethods = afterReport.totalMethods,
 
-            newFiles = newFiles,
-            deletedFiles = deletedFiles
+            newFrameworkFiles = findFrameworkFiles(newFiles),
+            removedFrameworkFiles = findFrameworkFiles(removedFiles),
+
+            newAppFiles = findAppFiles(newFiles),
+            removedAppFiles = findAppFiles(removedFiles)
         ).make()
     }
 
 
-    private fun findNewOrDeletedFiles(beforeFiles: List<File>, afterFiles: List<File>): List<File> {
+    private fun findNewOrRemovedFiles(beforeFiles: List<File>, afterFiles: List<File>): List<File> {
         val newFiles = mutableListOf<File>()
         afterFiles.forEach { afterFile ->
             if (!beforeFiles.any { beforeFile ->
-                    val beforeAbsPath = beforeFile.absolutePath
-                    val beforeRelPath = beforeAbsPath.split("-decompiled/sources/").last()
-
-                    val afterAbsPath = afterFile.absolutePath
-                    val afterRelPath = afterAbsPath.split("-decompiled/sources/").last()
+                    val beforeRelPath = beforeFile.relativeAndroidPath()
+                    val afterRelPath = afterFile.relativeAndroidPath()
                     beforeRelPath == afterRelPath
                 }) {
                 newFiles.add(afterFile)
@@ -86,5 +107,20 @@ class HomeViewModel @Inject constructor(
         return newFiles
     }
 
+    private fun findFrameworkFiles(files: List<File>): List<File> {
+        return files.filter { file ->
+            FRAMEWORK_PACKAGES.any { file.relativeAndroidPath().startsWith(it) }
+        }
+    }
+
+    private fun findAppFiles(files: List<File>): List<File> {
+        return files.filter { file ->
+            FRAMEWORK_PACKAGES.none { file.relativeAndroidPath().startsWith(it) }
+        }
+    }
+
+    private fun File.relativeAndroidPath(): String {
+        return this.absolutePath.split("-decompiled/sources/").last()
+    }
 
 }

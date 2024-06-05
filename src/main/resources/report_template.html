@@ -34,6 +34,20 @@
                     </tr>
 
                     <tr>
+                        <td>Total framework files</td>
+                        <td>{{beforeTotalFrameworkFiles}}</td>
+                        <td>{{afterTotalFrameworkFiles}}</td>
+                        <td>{{diffTotalFrameworkFiles}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Total app files</td>
+                        <td>{{beforeTotalAppFiles}}</td>
+                        <td>{{afterTotalAppFiles}}</td>
+                        <td>{{diffTotalAppFiles}}</td>
+                    </tr>
+
+                    <tr>
                         <td>Total classes</td>
                         <td>{{beforeTotalClasses}}</td>
                         <td>{{afterTotalClasses}}</td>
@@ -50,18 +64,31 @@
             </table>
 
             <!--New files-->
-            <h3>New files</h3>
-            {{newFilesTable}}
+            <h3>New app files</h3>
+            {{newAppFilesTable}}
 
             <!--Removed files-->
-            <h3>Removed files</h3>
-            {{removedFilesTable}}
+            <h3>Removed app files</h3>
+            {{removedAppFilesTable}}
 
             <!--Changed files-->
-            <h3>Changed files</h3>
-            {{changedFilesTable}}
+            <h3>Changed app files</h3>
+            {{changedAppFilesTable}}
 
-            <!--Dex Change-->
+
+            <!--New files-->
+            <h3>New framework files</h3>
+            {{newFrameworkFilesTable}}
+
+            <!--Removed files-->
+            <h3>Removed framework files</h3>
+            {{removedFrameworkFilesTable}}
+
+            <!--Changed files-->
+            <h3>Changed framework files</h3>
+            {{changedFrameworkFilesTable}}
+
+
 
 
         </div>
