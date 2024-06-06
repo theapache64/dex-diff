@@ -174,3 +174,5 @@ gpm.json
 temp
 dex-diff-result
 node_modules
+jdeploy-bundle/
+jdeploy
