@@ -35,7 +35,7 @@ class ReportMaker(
 ) {
 
 
-    fun make() {
+    fun make() : File {
         println("QuickTag: ReportMaker:make: Making report...")
         val reportFile = File("src/main/resources/report_template.html").copyTo(
             File("temp/report.html"),
@@ -84,6 +84,8 @@ class ReportMaker(
             )
 
         reportFile.writeText(fullReport)
+
+        return reportFile
     }
 
     private fun String.addReportSummary(): String {
@@ -225,10 +227,10 @@ class ReportMaker(
     }
 
 
-    private fun Float.roundToTwoDecimals(): String {
-        return String.format("%.2f", this)
-    }
+}
 
+fun Float.roundToTwoDecimals(): String {
+    return String.format("%.2f", this)
 }
 
 

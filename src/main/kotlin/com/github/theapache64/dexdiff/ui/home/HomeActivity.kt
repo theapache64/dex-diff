@@ -22,8 +22,11 @@ class HomeActivity : Activity() {
         super.onCreate()
         App.di.inject(this)
 
+
         viewModel.status.observe { msg ->
             println(msg)
         }
+
+        viewModel.init()
     }
 }

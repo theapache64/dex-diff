@@ -6,6 +6,7 @@ import com.github.theapache64.dexdiff.data.repo.AppRepo
 import com.github.theapache64.dexdiff.models.ChangedFile
 import com.github.theapache64.dexdiff.utils.ApkDecompiler
 import com.github.theapache64.dexdiff.utils.ReportMaker
+import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
 import java.io.File
@@ -34,36 +35,38 @@ class HomeViewModel @Inject constructor(
     val status: LiveData<String> = _status
 
 
-    init {
+    fun init(){
+        val analysisStarTime = System.currentTimeMillis()
         _status.value = INIT_MSG
         val appArgs = appRepo.args
         require(appArgs != null) {
             "Arguments not found"
         }
 
-        println("QuickTag: HomeViewModel:Deleting temp: ")
+        _status.value = "➡️ Deleting temp directory..."
 
         File("temp").deleteRecursively()
-        println("QuickTag: HomeViewModel:: Decompiling...")
+        _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
         val beforeReport = ApkDecompiler(appArgs.beforeApk).decompile()
+        _status.value = "➡️ Decompiling after APK... (this may take some time)"
         val afterReport = ApkDecompiler(appArgs.afterApk).decompile()
-        println("⏱\uFE0F QuickTag: HomeViewModel:: Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms ")
+        _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
 
         // Find newly added files
-        println("QuickTag: HomeViewModel:Finding newly added files: ")
+        _status.value = "➡️ Finding newly added files: "
         startTime = System.currentTimeMillis()
         val beforeFiles = beforeReport.decompiledDir.walk().toList().filter { it.isFile }
         val afterFiles = afterReport.decompiledDir.walk().toList().filter { it.isFile }
-        println("QuickTag: HomeViewModel:: files are ready to compare")
-        println("QuickTag: HomeViewModel:: beforeFiles count : ${beforeFiles.size}")
-        println("QuickTag: HomeViewModel:: afterFiles count : ${afterFiles.size}")
-        println("QuickTag: HomeViewModel:: comparing")
+        _status.value = "➡️ files are ready to compare"
+        _status.value = "➡️ beforeFiles count : ${beforeFiles.size}"
+        _status.value = "➡️ afterFiles count : ${afterFiles.size}"
+        _status.value = "➡️ comparing..."
         val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
         val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)
-        println("QuickTag: HomeViewModel:: new files count: ${newFiles.size}")
-        println("QuickTag: HomeViewModel:: deleted files count: ${removedFiles.size}")
-        println("QuickTag: HomeViewModel:: done")
+        _status.value = "➡️ new files count: ${newFiles.size}"
+        _status.value = "➡️ deleted files count: ${removedFiles.size}"
+        _status.value = "➡️ done"
 
         val frameworkFiles = findFrameworkFiles(beforeFiles)
         val beforeTotalFrameworkFiles = frameworkFiles.size
@@ -75,9 +78,9 @@ class HomeViewModel @Inject constructor(
         val changedFrameworkFiles =
             findContentChangedFiles(frameworkFiles, afterReport.decompiledDir.generatedDirName())
         val changedAppFiles = findContentChangedFiles(appFiles, afterReport.decompiledDir.generatedDirName())
-        println("⏱\uFE0F QuickTag: HomeViewModel:Analysis took ${System.currentTimeMillis() - startTime}ms ")
+        _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
-        ReportMaker(
+        val reportFile = ReportMaker(
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
             afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
 
@@ -106,6 +109,8 @@ class HomeViewModel @Inject constructor(
             changedFrameworkFiles = changedFrameworkFiles,
             changedAppFiles = changedAppFiles
         ).make()
+
+        _status.value = "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
     private fun countLinesAddedAndRemoved(beforeFile: File, afterFile: File): Pair<Int, Int> {
