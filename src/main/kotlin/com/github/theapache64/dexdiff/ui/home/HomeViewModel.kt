@@ -6,6 +6,7 @@ import com.github.theapache64.dexdiff.data.repo.AppRepo
 import com.github.theapache64.dexdiff.models.ChangedFile
 import com.github.theapache64.dexdiff.utils.ApkDecompiler
 import com.github.theapache64.dexdiff.utils.ReportMaker
+import com.github.theapache64.dexdiff.utils.readAsResource
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
@@ -35,7 +36,7 @@ class HomeViewModel @Inject constructor(
     val status: LiveData<String> = _status
 
 
-    fun init(){
+    fun init() {
         val analysisStarTime = System.currentTimeMillis()
         _status.value = INIT_MSG
         val appArgs = appRepo.args
@@ -110,7 +111,8 @@ class HomeViewModel @Inject constructor(
             changedAppFiles = changedAppFiles
         ).make()
 
-        _status.value = "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
+        _status.value =
+            "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
     private fun countLinesAddedAndRemoved(beforeFile: File, afterFile: File): Pair<Int, Int> {
@@ -128,6 +130,7 @@ class HomeViewModel @Inject constructor(
                     linesAdded += delta.source.lines.size
                     linesRemoved += delta.target.lines.size
                 }
+
                 DeltaType.INSERT -> linesAdded += delta.target.lines.size
                 DeltaType.DELETE -> linesRemoved += delta.source.lines.size
                 null, DeltaType.EQUAL -> {
@@ -147,11 +150,9 @@ class HomeViewModel @Inject constructor(
                 if (beforeFile.readText() != afterFile.readText()) {
                     // file content changed
                     val packageNamePlusClassName = afterFile.absolutePath.split(afterSrcDirName)[1].replace("/", "_")
-                    val diffHtml = File("temp/$packageNamePlusClassName-diff.html")
-                    File("src/main/resources/file_diff_template.html").copyTo(
-                        diffHtml,
-                        overwrite = true
-                    )
+                    val diffHtml = File("temp/$packageNamePlusClassName-diff.html").apply {
+                        writeText("file_diff_template.html".readAsResource())
+                    }
 
                     val diff = diffHtml.readText()
                         .replace("{{after}}", beforeFile.readText())

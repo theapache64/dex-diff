@@ -4,6 +4,7 @@ import com.github.theapache64.dexdiff.models.ChangedFile
 import com.github.theapache64.dexdiff.ui.home.HomeViewModel
 import java.io.File
 
+
 class ReportMaker(
     private val beforeApkSizeInKb: Int,
     private val afterApkSizeInKb: Int,
@@ -35,12 +36,11 @@ class ReportMaker(
 ) {
 
 
-    fun make() : File {
+    fun make(): File {
         println("QuickTag: ReportMaker:make: Making report...")
-        val reportFile = File("src/main/resources/report_template.html").copyTo(
-            File("temp/report.html"),
-            overwrite = true
-        )
+        val reportFile =  File("temp/report.html").apply {
+            writeText("report_template.html".readAsResource())
+        }
 
         val frameworkNote =
             "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
@@ -131,7 +131,7 @@ class ReportMaker(
 
             .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedAppFiles.size} files")
             .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
-            .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size } files")
+            .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size} files")
     }
 
 
@@ -147,7 +147,7 @@ class ReportMaker(
                 Pair(it, it.readLines().size)
             }
             .sortedByDescending { it.second } // by line size
-            .joinToString("\n") {(file, lineCount) ->
+            .joinToString("\n") { (file, lineCount) ->
                 """
                 <tr>
                     <td><a target="_blank" href="file://${file.absolutePath}">${file.name}</a></td>
@@ -227,6 +227,11 @@ class ReportMaker(
     }
 
 
+}
+
+fun String.readAsResource(): String {
+    val classloader = Thread.currentThread().contextClassLoader
+    return classloader.getResourceAsStream(this)?.reader()?.readText() ?: error("Resource not found : $this")
 }
 
 fun Float.roundToTwoDecimals(): String {

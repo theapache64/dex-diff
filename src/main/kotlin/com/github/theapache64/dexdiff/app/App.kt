@@ -1,6 +1,7 @@
 package com.github.theapache64.dexdiff.app
 
 import com.github.theapache64.dexdiff.ui.splash.SplashActivity
+import com.github.theapache64.dexdiff.utils.readAsResource
 import com.theapache64.cyclone.core.Application
 import javax.inject.Inject
 
