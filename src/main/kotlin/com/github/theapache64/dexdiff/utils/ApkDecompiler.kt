@@ -20,7 +20,7 @@ class ApkDecompiler(
 ) {
 
     fun decompile(): DecompileReport {
-        val decompiledDir = File("temp/${apkFile.nameWithoutExtension}-${currentDateTime()}-decompiled")
+        val decompiledDir = File("dex-diff-result/${apkFile.nameWithoutExtension}-${currentDateTime()}-decompiled")
         val jadxArgs = JadxArgs()
         jadxArgs.setInputFile(apkFile)
         jadxArgs.outDir = decompiledDir

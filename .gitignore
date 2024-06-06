@@ -172,3 +172,5 @@ build
 gpm.json
 .DS_Store
 temp
+dex-diff-result
+node_modules

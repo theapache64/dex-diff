@@ -44,9 +44,9 @@ class HomeViewModel @Inject constructor(
             "Arguments not found"
         }
 
-        _status.value = "➡️ Deleting temp directory..."
+        _status.value = "➡️ Deleting old results..."
 
-        File("temp").deleteRecursively()
+        File("dex-diff-result").deleteRecursively()
         _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
         val beforeReport = ApkDecompiler(appArgs.beforeApk).decompile()
@@ -145,12 +145,12 @@ class HomeViewModel @Inject constructor(
     private fun findContentChangedFiles(beforeFiles: List<File>, afterSrcDirName: String): List<ChangedFile> {
         val changedFiles = mutableListOf<ChangedFile>()
         beforeFiles.forEach { beforeFile ->
-            val afterFile = File("temp/$afterSrcDirName/sources/${beforeFile.relativeAndroidPath()}")
+            val afterFile = File("dex-diff-result/$afterSrcDirName/sources/${beforeFile.relativeAndroidPath()}")
             if (afterFile.exists()) {
                 if (beforeFile.readText() != afterFile.readText()) {
                     // file content changed
                     val packageNamePlusClassName = afterFile.absolutePath.split(afterSrcDirName)[1].replace("/", "_")
-                    val diffHtml = File("temp/$packageNamePlusClassName-diff.html").apply {
+                    val diffHtml = File("dex-diff-result/$packageNamePlusClassName-diff.html").apply {
                         writeText("file_diff_template.html".readAsResource())
                     }
 
@@ -210,5 +210,5 @@ class HomeViewModel @Inject constructor(
 }
 
 private fun File.generatedDirName(): String {
-    return this.absolutePath.split("temp/")[1].split("/")[0]
+    return this.absolutePath.split("dex-diff-result/")[1].split("/")[0]
 }

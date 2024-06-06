@@ -1,0 +1,27 @@
+{
+  "bin": {"dex-diff": "jdeploy-bundle/jdeploy.js"},
+  "author": "theapache64",
+  "description": "A tool to compare two APK files at dex level",
+  "main": "index.js",
+  "preferGlobal": "true",
+  "repository": "https://github.com/theapache64/dex-diff",
+  "version": "0.0.1",
+  "jdeploy": {
+    "jdk": "false",
+    "javaVersion": "17",
+    "jar": "dex-diff.main.jar",
+    "javafx": "false",
+    "title": "dex-diff"
+  },
+  "dependencies": {
+    "command-exists-promise": "^2.0.2",
+    "node-fetch": "2.6.7",
+    "tar": "^4.4.8",
+    "yauzl": "^2.10.0",
+    "shelljs": "^0.8.4"
+  },
+  "license": "ISC",
+  "name": "dex-diff",
+  "files": ["jdeploy-bundle"],
+  "scripts": {"test": "echo \"Error: no test specified\" && exit 1"}
+}

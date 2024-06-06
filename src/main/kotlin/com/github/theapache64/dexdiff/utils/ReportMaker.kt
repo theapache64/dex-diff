@@ -38,7 +38,7 @@ class ReportMaker(
 
     fun make(): File {
         println("QuickTag: ReportMaker:make: Making report...")
-        val reportFile =  File("temp/report.html").apply {
+        val reportFile =  File("dex-diff-result/report.html").apply {
             writeText("report_template.html".readAsResource())
         }
 
