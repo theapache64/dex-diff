@@ -1,0 +1,44 @@
+<html>
+    <head>
+        <!--jsdiff-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.2.0/diff.min.js" integrity="sha512-lKVITyoJW3nWzWcWWfcR2CibmobDzrWNWvSF8iFM5NaNTSb0vQ/TGZVR/MGc+LT8isfIP5mxFJB9j31fAIlXsg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+        <title>⚡ {{fileName}} - Dex Diff</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1>{{fileName}}</h1>
+            <pre id="display"></pre>
+        </div>
+        <script>
+            var one = `{{after}}`,
+                other = `{{before}}`,
+                color = '',
+                span = null;
+
+            var diff = Diff.diffLines(one, other),
+                display = document.getElementById('display'),
+                fragment = document.createDocumentFragment();
+
+            diff.forEach(function(part){
+                // green for additions, red for deletions
+                // grey for common parts
+                color = part.added ? 'green' :
+                    part.removed ? 'red' : 'grey';
+                span = document.createElement('span');
+                span.style.color = color;
+                span.appendChild(document
+                    .createTextNode(part.value));
+                fragment.appendChild(span);
+            });
+
+            display.appendChild(fragment);
+
+        </script>
+    </body>
+</html>

@@ -1,5 +1,6 @@
 package com.github.theapache64.dexdiff.utils
 
+import com.github.theapache64.dexdiff.models.ChangedFile
 import com.github.theapache64.dexdiff.ui.home.HomeViewModel
 import java.io.File
 
@@ -26,11 +27,11 @@ class ReportMaker(
     private val newFrameworkFiles: List<File>,
     private val removedFrameworkFiles: List<File>,
 
-    private val newAppFiles : List<File>,
-    private val removedAppFiles : List<File>,
+    private val newAppFiles: List<File>,
+    private val removedAppFiles: List<File>,
 
-    private val changedFrameworkFiles : List<Pair<File, File>>,
-    private val changedAppFiles : List<Pair<File, File>>
+    private val changedFrameworkFiles: List<ChangedFile>,
+    private val changedAppFiles: List<ChangedFile>
 ) {
 
 
@@ -41,10 +42,13 @@ class ReportMaker(
             overwrite = true
         )
 
-        val frameworkNote = "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
-        val frameworkChangedNote = "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
-        val appNote = "These are classes NOT inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
-        val appChangedNote = "These are classes NOT inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
+        val frameworkNote =
+            "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+        val frameworkChangedNote =
+            "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
+        val appNote = "These are classes outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+        val appChangedNote =
+            "These are classes outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
 
         val fullReport = reportFile.readText()
             .addReportSummary()
@@ -68,13 +72,13 @@ class ReportMaker(
                 note = appNote,
                 key = "removedAppFilesTable"
             )
-            .add(
-                files = changedFrameworkFiles.map { it.first },
+            .addChangedFiles(
+                files = changedFrameworkFiles,
                 note = frameworkChangedNote,
                 key = "changedFrameworkFilesTable"
             )
-            .add(
-                files = changedAppFiles.map { it.first },
+            .addChangedFiles(
+                files = changedAppFiles,
                 note = appChangedNote,
                 key = "changedAppFilesTable"
             )
@@ -92,12 +96,27 @@ class ReportMaker(
             .replace("{{afterTotalFiles}}", "$afterTotalFiles (100%)")
             .replace("{{diffTotalFiles}}", "${(afterTotalFiles - beforeTotalFiles).withSymbol()} files")
 
-            .replace("{{beforeTotalFrameworkFiles}}", "$beforeTotalFrameworkFiles (${((beforeTotalFrameworkFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{afterTotalFrameworkFiles}}", "$afterTotalFrameworkFiles (${((afterTotalFrameworkFiles / afterTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{diffTotalFrameworkFiles}}", "${(afterTotalFrameworkFiles - beforeTotalFrameworkFiles).withSymbol()} files")
+            .replace(
+                "{{beforeTotalFrameworkFiles}}",
+                "$beforeTotalFrameworkFiles (${((beforeTotalFrameworkFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{afterTotalFrameworkFiles}}",
+                "$afterTotalFrameworkFiles (${((afterTotalFrameworkFiles / afterTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{diffTotalFrameworkFiles}}",
+                "${(afterTotalFrameworkFiles - beforeTotalFrameworkFiles).withSymbol()} files"
+            )
 
-            .replace("{{beforeTotalAppFiles}}", "$beforeTotalAppFiles (${((beforeTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{afterTotalAppFiles}}", "$afterTotalAppFiles (${((afterTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace(
+                "{{beforeTotalAppFiles}}",
+                "$beforeTotalAppFiles (${((beforeTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{afterTotalAppFiles}}",
+                "$afterTotalAppFiles (${((afterTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
             .replace("{{diffTotalAppFiles}}", "${(afterTotalAppFiles - beforeTotalAppFiles).withSymbol()} files")
 
             .replace("{{beforeTotalClasses}}", "$beforeTotalClasses")
@@ -108,25 +127,72 @@ class ReportMaker(
             .replace("{{afterTotalMethods}}", "$afterTotalMethods")
             .replace("{{diffTotalMethods}}", "${(afterTotalMethods - beforeTotalMethods).withSymbol()} methods")
 
-            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size} files")
+            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedAppFiles.size} files")
+            .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
+            .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size } files")
     }
 
 
     private fun String.add(
-        files : List<File>,
-        note : String,
-        key : String,
+        files: List<File>,
+        note: String,
+        key: String,
     ): String {
         val table = StringBuilder()
 
-        val tableBody = files.joinToString("\n") { file ->
-            """
+        val tableBody = files
+            .map {
+                Pair(it, it.readLines().size)
+            }
+            .sortedByDescending { it.second } // by line size
+            .joinToString("\n") {(file, lineCount) ->
+                """
                 <tr>
                     <td><a target="_blank" href="file://${file.absolutePath}">${file.name}</a></td>
-                    <td>${file.readLines().size}</td>
+                    <td>${lineCount}</td>
                 </tr>
             """.trimIndent()
-        }
+            }
+
+        table.append(
+            """
+            <div class="alert alert-info">
+              <strong>NOTE: $note</strong> 
+            </div>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Lines</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    $tableBody
+                </tbody>
+            </table>
+        """.trimIndent()
+        )
+
+        return this.replace("{{$key}}", table.toString())
+    }
+
+    private fun String.addChangedFiles(
+        files: List<ChangedFile>,
+        note: String,
+        key: String,
+    ): String {
+        val table = StringBuilder()
+
+        val tableBody = files
+            .sortedByDescending { changedFile -> changedFile.linesAdded + changedFile.linedRemoved }
+            .joinToString("\n") { changedFile ->
+                """
+                <tr>
+                    <td><a target="_blank" href="file://${changedFile.diffHtml.absolutePath}">${changedFile.beforeFile.name}</a></td>
+                    <td><span class="label label-danger">--${changedFile.linedRemoved}</span> <span class="label label-success">++${changedFile.linesAdded}</span></td>
+                </tr>
+            """.trimIndent()
+            }
 
         table.append(
             """

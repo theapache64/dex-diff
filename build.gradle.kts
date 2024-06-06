@@ -31,6 +31,9 @@ dependencies {
     implementation("io.github.skylot:jadx-dex-input:$jadxVersion")
     implementation("io.github.skylot:jadx-java-input:$jadxVersion")
 
+    // DiffUtils
+    implementation("io.github.java-diff-utils:java-diff-utils:4.12")
+
     // Test deps
     testImplementation(kotlin("test"))
     testImplementation("com.github.theapache64:expekt:1.0.0")

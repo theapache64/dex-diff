@@ -3,6 +3,12 @@
         <!--Bootstrap-->
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 
+        <title>⚡ Dex Diff</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     </head>
     <body>
         <div class="container">
@@ -62,38 +68,45 @@
                     </tr>
                     <tr>
                         <td>Changed files</td>
-                        <td>{{changedFilesCount}}</td>
+                        <td colspan="3" style="text-align: center;">{{changedFilesCount}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Changed app files</td>
+                        <td colspan="3" style="text-align: center;">{{changedAppFilesCount}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>Changed framework files</td>
+                        <td colspan="3" style="text-align: center;">{{changedFrameworkFilesCount}}</td>
                     </tr>
                 </tbody>
             </table>
 
             <!--New files-->
-            <h3>New app files</h3>
+            <h3>🆕 New app files</h3>
             {{newAppFilesTable}}
 
             <!--Removed files-->
-            <h3>Removed app files</h3>
+            <h3>❌️ Removed app files</h3>
             {{removedAppFilesTable}}
 
             <!--Changed files-->
-            <h3>Changed app files</h3>
+            <h3>🔄 Changed app files</h3>
             {{changedAppFilesTable}}
 
 
             <!--New files-->
-            <h3>New framework files</h3>
+            <h3>🆕 New framework files</h3>
             {{newFrameworkFilesTable}}
 
             <!--Removed files-->
-            <h3>Removed framework files</h3>
+            <h3>❌ Removed framework files</h3>
             {{removedFrameworkFilesTable}}
 
             <!--Changed files-->
-            <h3>Changed framework files</h3>
+            <h3>🔄 Changed framework files</h3>
             {{changedFrameworkFilesTable}}
-
-
-
 
         </div>
     </body>
