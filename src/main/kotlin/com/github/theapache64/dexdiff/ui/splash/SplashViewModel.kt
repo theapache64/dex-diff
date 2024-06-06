@@ -9,7 +9,7 @@ class SplashViewModel @Inject constructor(
     appRepo: AppRepo
 ) {
     companion object{
-        const val VERSION = "1.0.0-alpha01"
+        const val VERSION = "0.0.2"
     }
 
     private val _welcomeMsg = MutableLiveData<String>()
