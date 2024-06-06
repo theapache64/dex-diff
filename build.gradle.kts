@@ -34,6 +34,9 @@ dependencies {
     // DiffUtils
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
+    // SL4J
+    implementation("org.slf4j:slf4j-nop:2.0.7")
+
     // Test deps
     testImplementation(kotlin("test"))
     testImplementation("com.github.theapache64:expekt:1.0.0")
