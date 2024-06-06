@@ -9,9 +9,47 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+        <style>
+            .tableContainer {
+                width: 100%;
+                max-height: 700px;
+                overflow: auto;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: separate; /* Don't collapse */
+                border-spacing: 0;
+            }
+
+            table th {
+                /* Apply both top and bottom borders to the <th> */
+                border-top: 2px solid;
+                border-bottom: 2px solid;
+                border-right: 2px solid;
+            }
+
+            table td {
+                /* For cells, apply the border to one of each side only (right but not left, bottom but not top) */
+                border-bottom: 2px solid;
+                border-right: 2px solid;
+            }
+
+            table th:first-child,
+            table td:first-child {
+                /* Apply a left border on the first <td> or <th> in a row */
+                border-left: 2px solid;
+            }
+
+            table thead th {
+                position: sticky;
+                top: 0;
+                background-color: #ffffff;
+            }
+        </style>
     </head>
     <body>
-        <div class="container">
+        <div class="container-fluid">
             <h1>Dex Diff Report</h1>
 
             <h3>Summary</h3>
