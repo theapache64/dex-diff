@@ -59,10 +59,6 @@ class HomeViewModel @Inject constructor(
         _status.value = "➡️ afterFiles count : ${afterFiles.size}"
         _status.value = "➡️ comparing..."
 
-        /*        val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
-                val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)*/
-
-
         val filesResult = createFileResult(
             appPackages = appArgs.appPackages,
             beforeReport = beforeReport,
@@ -82,7 +78,6 @@ class HomeViewModel @Inject constructor(
         val afterLibraryFiles = filesResult.afterLibraryFiles
         val beforeTotalLibraryFiles = beforeLibraryFiles.size
         val afterTotalLibraryFiles = afterLibraryFiles.size
-        val changedLibraryFiles = filesResult.changedLibraryFiles
 
         // framework files
         val beforeFrameworkFiles = filesResult.beforeFrameworkFiles
