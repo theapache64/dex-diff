@@ -7,6 +7,7 @@ import com.github.theapache64.dexdiff.utils.ReportMaker
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
+import java.io.File
 import javax.inject.Inject
 
 
@@ -40,13 +41,23 @@ class HomeViewModel @Inject constructor(
         }
 
         _status.value = "➡️ Deleting old results..."
-
-        // File("dex-diff-result").deleteRecursively()
+        val isDebug = false
+        if (!isDebug) {
+            File("dex-diff-result").deleteRecursively()
+        }
         _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
-        val beforeReport = ApkDecompiler(appArgs.beforeApk).cachedBefore()
+        val beforeReport = if (isDebug) {
+            ApkDecompiler(appArgs.beforeApk).cachedBefore()
+        } else {
+            ApkDecompiler(appArgs.beforeApk).decompile()
+        }
         _status.value = "➡️ Decompiling after APK... (this may take some time)"
-        val afterReport = ApkDecompiler(appArgs.afterApk).cachedAfter()
+        val afterReport = if (isDebug) {
+            ApkDecompiler(appArgs.afterApk).cachedAfter()
+        } else {
+            ApkDecompiler(appArgs.afterApk).decompile()
+        }
         _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
 
         // Find newly added files
