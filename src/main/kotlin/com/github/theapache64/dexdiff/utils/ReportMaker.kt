@@ -32,12 +32,16 @@ class ReportMaker(
 
     private val newFrameworkFiles: List<File>,
     private val removedFrameworkFiles: List<File>,
+    private val changedFrameworkFiles: List<ChangedFile>,
+
+    private val newFocusedFiles: List<File>,
+    private val removedFocusedFiles: List<File>,
+    private val changedFocusedFiles: List<ChangedFile>,
 
     private val newAppFiles: List<File>,
     private val removedAppFiles: List<File>,
-
-    private val changedFrameworkFiles: List<ChangedFile>,
     private val changedAppFiles: List<ChangedFile>
+
 ) {
 
 
@@ -58,16 +62,6 @@ class ReportMaker(
         val fullReport = reportFile.readText()
             .addReportSummary()
             .add(
-                files = newFrameworkFiles,
-                note = frameworkNote,
-                key = "newFrameworkFilesTable"
-            )
-            .add(
-                files = removedFrameworkFiles,
-                note = frameworkNote,
-                key = "removedFrameworkFilesTable"
-            )
-            .add(
                 files = newAppFiles,
                 note = appNote,
                 key = "newAppFilesTable"
@@ -78,15 +72,41 @@ class ReportMaker(
                 key = "removedAppFilesTable"
             )
             .addChangedFiles(
-                files = changedFrameworkFiles,
-                note = frameworkChangedNote,
-                replaceKey = "changedFrameworkFilesTable"
-            )
-            .addChangedFiles(
                 files = changedAppFiles,
                 note = appChangedNote,
                 replaceKey = "changedAppFilesTable"
             )
+            .add(
+                files = newFrameworkFiles,
+                note = frameworkNote,
+                key = "newFrameworkFilesTable"
+            )
+            .add(
+                files = removedFrameworkFiles,
+                note = frameworkNote,
+                key = "removedFrameworkFilesTable"
+            )
+            .addChangedFiles(
+                files = changedFrameworkFiles,
+                note = frameworkChangedNote,
+                replaceKey = "changedFrameworkFilesTable"
+            )
+            .add(
+                files = newFocusedFiles,
+                note = "These are classes inside focused packages",
+                key = "newFocusedFilesTable"
+            )
+            .add(
+                files = removedFocusedFiles,
+                note = "These are classes inside focused packages",
+                key = "removedFocusedFilesTable"
+            )
+            .addChangedFiles(
+                files = changedFocusedFiles,
+                note = "These are classes inside focused packages with content changes",
+                replaceKey = "changedFocusedFilesTable"
+            )
+
 
         reportFile.writeText(fullReport)
 

@@ -12,8 +12,13 @@ interface AppRepo {
 
 @Singleton
 class AppRepoImpl @Inject constructor() : AppRepo {
-    override var args: AppArgs? =  AppArgs(
+    override var args: AppArgs? = AppArgs(
         beforeApk = File(App.args?.getOrNull(0) ?: error("Before APK is missing")),
-        afterApk = File(App.args?.getOrNull(1) ?: error("After APK is missing"))
+        afterApk = File(App.args?.getOrNull(1) ?: error("After APK is missing")),
+        focusedPackages = App.args?.getOrNull(2)
+            ?.split(",")
+            ?.map {
+                it.replace(".", "/")
+            } ?: emptyList()
     )
 }

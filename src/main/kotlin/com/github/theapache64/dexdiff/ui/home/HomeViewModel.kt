@@ -63,22 +63,28 @@ class HomeViewModel @Inject constructor(
         _status.value = "➡️ beforeFiles count : ${beforeFiles.size}"
         _status.value = "➡️ afterFiles count : ${afterFiles.size}"
         _status.value = "➡️ comparing..."
+
         val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
         val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)
         _status.value = "➡️ new files count: ${newFiles.size}"
         _status.value = "➡️ deleted files count: ${removedFiles.size}"
-        _status.value = "➡️ done"
 
-        val frameworkFiles = findFrameworkFiles(beforeFiles)
-        val beforeTotalFrameworkFiles = frameworkFiles.size
+        val afterFrameworkFiles = findFrameworkFiles(afterFiles)
+        val beforeFrameworkFiles = findFrameworkFiles(afterFiles)
+        val beforeTotalFrameworkFiles = afterFrameworkFiles.size
         val afterTotalFrameworkFiles = findFrameworkFiles(afterFiles).size
-        val appFiles = findAppFiles(beforeFiles)
-        val beforeTotalAppFiles = appFiles.size
+
+        val afterAppFiles = findAppFiles(afterFiles)
+        val beforeAppFiles = findAppFiles(beforeFiles)
+        val afterFocusedFiles = findFocusedFiles(afterFiles)
+        val beforeTotalAppFiles = afterAppFiles.size
         val afterTotalAppFiles = findAppFiles(afterFiles).size
 
-        val changedFrameworkFiles =
-            findContentChangedFiles(frameworkFiles, afterReport.decompiledDir.generatedDirName())
-        val changedAppFiles = findContentChangedFiles(appFiles, afterReport.decompiledDir.generatedDirName())
+
+        val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
+        val changedFrameworkFiles = findContentChangedFiles(beforeFrameworkFiles, afterSrcDirName)
+        val changedAppFiles = findContentChangedFiles(beforeAppFiles, afterSrcDirName)
+        val changedFocusedFiles = findContentChangedFiles(afterFocusedFiles, afterSrcDirName)
         _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
         val reportFile = ReportMaker(
@@ -101,14 +107,18 @@ class HomeViewModel @Inject constructor(
             beforeTotalMethods = beforeReport.totalMethods,
             afterTotalMethods = afterReport.totalMethods,
 
+            newFocusedFiles = findFocusedFiles(newFiles),
+            removedFocusedFiles = findFocusedFiles(removedFiles),
+            changedFocusedFiles = changedFocusedFiles,
+
             newFrameworkFiles = findFrameworkFiles(newFiles),
             removedFrameworkFiles = findFrameworkFiles(removedFiles),
+            changedFrameworkFiles = changedFrameworkFiles,
 
             newAppFiles = findAppFiles(newFiles),
             removedAppFiles = findAppFiles(removedFiles),
-
-            changedFrameworkFiles = changedFrameworkFiles,
             changedAppFiles = changedAppFiles
+
         ).make()
 
         _status.value =
@@ -203,10 +213,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun findFocusedFiles(files: List<File>): List<File> {
+        val appArgs = appRepo.args!!
+        return files.filter { file ->
+            appArgs.focusedPackages.any { file.relativeAndroidPath().startsWith(it) }
+        }
+    }
+
     private fun File.relativeAndroidPath(): String {
         return this.absolutePath.split("-decompiled/sources/").last()
     }
-
 }
 
 private fun File.generatedDirName(): String {
