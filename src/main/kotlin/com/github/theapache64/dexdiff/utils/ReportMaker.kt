@@ -11,6 +11,7 @@ fun File.parsePackageName(): String {
 }
 
 class ReportMaker(
+    val focusedPackages: List<String>,
     private val beforeApkSizeInKb: Int,
     private val afterApkSizeInKb: Int,
 
@@ -52,12 +53,17 @@ class ReportMaker(
         }
 
         val frameworkNote =
-            "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+            "These are files inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
         val frameworkChangedNote =
-            "These are classes inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
-        val appNote = "These are classes outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
+            "These are files inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
+
+        val appNote = "These are files outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' and '${
+            focusedPackages.joinToString(",")
+        }' directory"
         val appChangedNote =
-            "These are classes outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
+            "These are files outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' and '${
+                focusedPackages.joinToString(",")
+            }' directory with content changes"
 
         val fullReport = reportFile.readText()
             .addReportSummary()
@@ -93,17 +99,17 @@ class ReportMaker(
             )
             .add(
                 files = newFocusedFiles,
-                note = "These are classes inside focused packages",
+                note = "These are files inside '${focusedPackages.joinToString(",")}'",
                 key = "newFocusedFilesTable"
             )
             .add(
                 files = removedFocusedFiles,
-                note = "These are classes inside focused packages",
+                note = "These are files inside '${focusedPackages.joinToString(",")}'",
                 key = "removedFocusedFilesTable"
             )
             .addChangedFiles(
                 files = changedFocusedFiles,
-                note = "These are classes inside focused packages with content changes",
+                note = "These are files inside '${focusedPackages.joinToString(",")}' with content changes",
                 replaceKey = "changedFocusedFilesTable"
             )
 
@@ -154,9 +160,10 @@ class ReportMaker(
             .replace("{{afterTotalMethods}}", "$afterTotalMethods")
             .replace("{{diffTotalMethods}}", "${(afterTotalMethods - beforeTotalMethods).withSymbol()} methods")
 
-            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedAppFiles.size} files")
+            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedAppFiles.size + changedFocusedFiles.size} files")
             .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
             .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size} files")
+            .replace("{{changedFocusedFilesCount}}", "${changedFocusedFiles.size} files")
     }
 
 
@@ -209,7 +216,7 @@ class ReportMaker(
         return this.replace("{{$replaceKey}}", table.toString())
     }
 
-    private fun buildTable(table: StringBuilder, note: String, tableBody: String, isTableEmpty : Boolean) {
+    private fun buildTable(table: StringBuilder, note: String, tableBody: String, isTableEmpty: Boolean) {
         if (isTableEmpty) {
 
             table.append(

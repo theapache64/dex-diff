@@ -110,6 +110,11 @@
                     </tr>
 
                     <tr>
+                        <td>Changed focused files</td>
+                        <td colspan="3" style="text-align: center;">{{changedFocusedFilesCount}}</td>
+                    </tr>
+
+                    <tr>
                         <td>Changed app files</td>
                         <td colspan="3" style="text-align: center;">{{changedAppFilesCount}}</td>
                     </tr>
@@ -118,6 +123,7 @@
                         <td>Changed framework files</td>
                         <td colspan="3" style="text-align: center;">{{changedFrameworkFilesCount}}</td>
                     </tr>
+
                 </tbody>
             </table>
 
@@ -125,11 +131,11 @@
             {{newFocusedFilesTable}}
 
             <!--Removed files-->
-            <h3>❌️ Removed app files</h3>
+            <h3>❌️ Removed focused files</h3>
             {{removedFocusedFilesTable}}
 
             <!--Changed files-->
-            <h3>🔄 Changed app files</h3>
+            <h3>🔄 Changed focused files</h3>
             {{changedFocusedFilesTable}}
 
             <!--New files-->

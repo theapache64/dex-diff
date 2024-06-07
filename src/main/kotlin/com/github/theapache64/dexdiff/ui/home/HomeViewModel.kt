@@ -15,6 +15,7 @@ import java.nio.file.Files
 import javax.inject.Inject
 
 
+
 class HomeViewModel @Inject constructor(
     private val appRepo: AppRepo,
 ) {
@@ -46,12 +47,12 @@ class HomeViewModel @Inject constructor(
 
         _status.value = "➡️ Deleting old results..."
 
-        File("dex-diff-result").deleteRecursively()
+        // File("dex-diff-result").deleteRecursively()
         _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
-        val beforeReport = ApkDecompiler(appArgs.beforeApk).decompile()
+        val beforeReport = ApkDecompiler(appArgs.beforeApk).cachedBefore()
         _status.value = "➡️ Decompiling after APK... (this may take some time)"
-        val afterReport = ApkDecompiler(appArgs.afterApk).decompile()
+        val afterReport = ApkDecompiler(appArgs.afterApk).cachedAfter()
         _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
 
         // Find newly added files
@@ -69,25 +70,31 @@ class HomeViewModel @Inject constructor(
         _status.value = "➡️ new files count: ${newFiles.size}"
         _status.value = "➡️ deleted files count: ${removedFiles.size}"
 
-        val afterFrameworkFiles = findFrameworkFiles(afterFiles)
-        val beforeFrameworkFiles = findFrameworkFiles(afterFiles)
-        val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
-        val afterTotalFrameworkFiles = afterFrameworkFiles.size
+        val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
 
-        val afterAppFiles = findAppFiles(afterFiles)
-        val beforeAppFiles = findAppFiles(beforeFiles)
+        // focused files
+        val beforeFocusedFiles = findFocusedFiles(beforeFiles)
         val afterFocusedFiles = findFocusedFiles(afterFiles)
+        val changedFocusedFiles = findContentChangedFiles(beforeFocusedFiles, afterSrcDirName)
+
+        // app files
+        val beforeAppFiles = findAppFiles(beforeFiles) - beforeFocusedFiles.toSet()
+        val afterAppFiles = findAppFiles(afterFiles) - afterFocusedFiles.toSet()
         val beforeTotalAppFiles = beforeAppFiles.size
         val afterTotalAppFiles = afterAppFiles.size
-
-
-        val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
-        val changedFrameworkFiles = findContentChangedFiles(beforeFrameworkFiles, afterSrcDirName)
         val changedAppFiles = findContentChangedFiles(beforeAppFiles, afterSrcDirName)
-        val changedFocusedFiles = findContentChangedFiles(afterFocusedFiles, afterSrcDirName)
+
+        // framework files
+        val beforeFrameworkFiles = findFrameworkFiles(beforeFiles)
+        val afterFrameworkFiles = findFrameworkFiles(afterFiles)
+        val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
+        val afterTotalFrameworkFiles = afterFrameworkFiles.size
+        val changedFrameworkFiles = findContentChangedFiles(beforeFrameworkFiles, afterSrcDirName)
+
         _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
         val reportFile = ReportMaker(
+            focusedPackages = appArgs.focusedPackages,
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
             afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
 

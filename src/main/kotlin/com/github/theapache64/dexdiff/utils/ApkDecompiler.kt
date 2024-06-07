@@ -19,6 +19,24 @@ class ApkDecompiler(
     private val apkFile: File
 ) {
 
+    fun cachedBefore(): DecompileReport {
+        return DecompileReport(
+            decompiledDir = File("dex-diff-result/without-fullmode-2024_06_07__12_08_15-decompiled/sources"),
+            totalFiles = 1765,
+            totalClasses = 2086,
+            totalMethods = 6774
+        )
+    }
+
+    fun cachedAfter(): DecompileReport {
+        return DecompileReport(
+            decompiledDir = File("dex-diff-result/with-fullmode-2024_06_07__12_08_19-decompiled/sources"),
+            totalFiles = 1088,
+            totalClasses = 1240,
+            totalMethods = 5359
+        )
+    }
+
     fun decompile(): DecompileReport {
         val decompiledDir = File("dex-diff-result/${apkFile.nameWithoutExtension}-${currentDateTime()}-decompiled")
         val jadxArgs = JadxArgs()
