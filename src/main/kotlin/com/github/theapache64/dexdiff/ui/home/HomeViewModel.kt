@@ -93,7 +93,11 @@ class HomeViewModel @Inject constructor(
         _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
         val reportFile = ReportMaker(
-            apkFileDetails = "Before: <code>${appArgs.beforeApk.name}</code> </br> After: <code>${appArgs.afterApk.name}</code>",
+            apkFileDetails = """
+                Before: <code>${appArgs.beforeApk.name}</code> </br> 
+                After: <code>${appArgs.afterApk.name}</code> </br> 
+                App path: <code> ${appArgs.appPackages.joinToString(separator = ",")}</code>
+            """.trimIndent(),
             appPackages = appArgs.appPackages,
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
             afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
