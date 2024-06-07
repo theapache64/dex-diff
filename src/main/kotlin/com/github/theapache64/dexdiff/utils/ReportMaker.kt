@@ -11,6 +11,7 @@ fun File.parsePackageName(): String {
 }
 
 class ReportMaker(
+    val apkFileDetails  :String,
     val appPackages: List<String>,
     private val beforeApkSizeInKb: Int,
     private val afterApkSizeInKb: Int,
@@ -124,6 +125,7 @@ class ReportMaker(
 
     private fun String.addReportSummary(): String {
         return this
+            .replace("{{apkFileDetails}}", apkFileDetails)
             .replace("{{beforeApkSize}}", "$beforeApkSizeInKb KB")
             .replace("{{afterApkSize}}", "$afterApkSizeInKb KB")
             .replace("{{diffApkSize}}", "${(afterApkSizeInKb - beforeApkSizeInKb).withSymbol()} KB")

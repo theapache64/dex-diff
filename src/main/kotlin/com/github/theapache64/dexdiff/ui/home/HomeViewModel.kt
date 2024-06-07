@@ -1,19 +1,13 @@
 package com.github.theapache64.dexdiff.ui.home
 
-import com.github.difflib.DiffUtils
-import com.github.difflib.patch.DeltaType
 import com.github.theapache64.dexdiff.data.repo.AppRepo
-import com.github.theapache64.dexdiff.models.ChangedFile
+import com.github.theapache64.dexdiff.models.createFileResult
 import com.github.theapache64.dexdiff.utils.ApkDecompiler
 import com.github.theapache64.dexdiff.utils.ReportMaker
-import com.github.theapache64.dexdiff.utils.readAsResource
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
-import java.io.File
-import java.nio.file.Files
 import javax.inject.Inject
-
 
 
 class HomeViewModel @Inject constructor(
@@ -65,35 +59,41 @@ class HomeViewModel @Inject constructor(
         _status.value = "➡️ afterFiles count : ${afterFiles.size}"
         _status.value = "➡️ comparing..."
 
-        val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
-        val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)
-        _status.value = "➡️ new files count: ${newFiles.size}"
-        _status.value = "➡️ deleted files count: ${removedFiles.size}"
+        /*        val newFiles = findNewOrRemovedFiles(beforeFiles, afterFiles)
+                val removedFiles = findNewOrRemovedFiles(afterFiles, beforeFiles)*/
 
-        val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
+
+        val filesResult = createFileResult(
+            appPackages = appArgs.appPackages,
+            beforeReport = beforeReport,
+            afterReport = afterReport
+        )
+
+        _status.value = "➡️ new files count: ${filesResult.newFiles.size}"
+        _status.value = "➡️ removed files count: ${filesResult.removedFiles.size}"
 
         // app files
-        val beforeAppFiles = findAppFiles(beforeFiles)
-        val afterAppFiles = findAppFiles(afterFiles)
-        val changedAppFiles = findContentChangedFiles(beforeAppFiles, afterSrcDirName)
+        val beforeAppFiles = filesResult.beforeAppFiles
+        val afterAppFiles = filesResult.afterAppFiles
+        val changedAppFiles = filesResult.changedAppFiles
 
         // library files
-        val beforeLibraryFiles = findLibraryFiles(beforeFiles) - beforeAppFiles.toSet()
-        val afterLibraryFiles = findLibraryFiles(afterFiles) - afterAppFiles.toSet()
+        val beforeLibraryFiles = filesResult.beforeLibraryFiles
+        val afterLibraryFiles = filesResult.afterLibraryFiles
         val beforeTotalLibraryFiles = beforeLibraryFiles.size
         val afterTotalLibraryFiles = afterLibraryFiles.size
-        val changedLibraryFiles = findContentChangedFiles(beforeLibraryFiles, afterSrcDirName)
+        val changedLibraryFiles = filesResult.changedLibraryFiles
 
         // framework files
-        val beforeFrameworkFiles = findFrameworkFiles(beforeFiles)
-        val afterFrameworkFiles = findFrameworkFiles(afterFiles)
+        val beforeFrameworkFiles = filesResult.beforeFrameworkFiles
+        val afterFrameworkFiles = filesResult.afterFrameworkFiles
         val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
         val afterTotalFrameworkFiles = afterFrameworkFiles.size
-        val changedFrameworkFiles = findContentChangedFiles(beforeFrameworkFiles, afterSrcDirName)
 
         _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
         val reportFile = ReportMaker(
+            apkFileDetails = "Before: <code>${appArgs.beforeApk.name}</code> </br> After: <code>${appArgs.afterApk.name}</code>",
             appPackages = appArgs.appPackages,
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
             afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
@@ -117,17 +117,17 @@ class HomeViewModel @Inject constructor(
             beforeTotalMethods = beforeReport.totalMethods,
             afterTotalMethods = afterReport.totalMethods,
 
-            newAppFiles = findAppFiles(newFiles),
-            removedAppFiles = findAppFiles(removedFiles),
+            newAppFiles = filesResult.newAppFiles,
+            removedAppFiles = filesResult.removedAppFiles,
             changedAppFiles = changedAppFiles,
 
-            newFrameworkFiles = findFrameworkFiles(newFiles),
-            removedFrameworkFiles = findFrameworkFiles(removedFiles),
-            changedFrameworkFiles = changedFrameworkFiles,
+            newFrameworkFiles = filesResult.newFrameworkFiles,
+            removedFrameworkFiles = filesResult.removedFrameworkFiles,
+            changedFrameworkFiles = filesResult.changedFrameworkFiles,
 
-            newLibraryFiles = findLibraryFiles(newFiles),
-            removedLibraryFiles = findLibraryFiles(removedFiles),
-            changedLibraryFiles = changedLibraryFiles
+            newLibraryFiles = filesResult.newLibraryFiles,
+            removedLibraryFiles = filesResult.removedLibraryFiles,
+            changedLibraryFiles = filesResult.changedLibraryFiles
 
         ).make()
 
@@ -135,106 +135,6 @@ class HomeViewModel @Inject constructor(
             "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
-    private fun countLinesAddedAndRemoved(beforeFile: File, afterFile: File): Pair<Int, Int> {
-        val diff = DiffUtils.diff(
-            Files.readAllLines(beforeFile.toPath()),
-            Files.readAllLines(afterFile.toPath())
-        )
-
-        var linesAdded = 0
-        var linesRemoved = 0
-
-        for (delta in diff.deltas) {
-            when (delta.type) {
-                DeltaType.CHANGE -> {
-                    linesAdded += delta.source.lines.size
-                    linesRemoved += delta.target.lines.size
-                }
-
-                DeltaType.INSERT -> linesAdded += delta.target.lines.size
-                DeltaType.DELETE -> linesRemoved += delta.source.lines.size
-                null, DeltaType.EQUAL -> {
-                    // do nothing
-                }
-            }
-        }
-
-        return Pair(linesAdded, linesRemoved)
-    }
-
-    private fun findContentChangedFiles(beforeFiles: List<File>, afterSrcDirName: String): List<ChangedFile> {
-        val changedFiles = mutableListOf<ChangedFile>()
-        beforeFiles.forEach { beforeFile ->
-            val afterFile = File("dex-diff-result/$afterSrcDirName/sources/${beforeFile.relativeAndroidPath()}")
-            if (afterFile.exists()) {
-                if (beforeFile.readText() != afterFile.readText()) {
-                    // file content changed
-                    val packageNamePlusClassName = afterFile.absolutePath.split(afterSrcDirName)[1].replace("/", "_")
-                    val diffHtml = File("dex-diff-result/$packageNamePlusClassName-diff.html").apply {
-                        writeText("file_diff_template.html".readAsResource())
-                    }
-
-                    val diff = diffHtml.readText()
-                        .replace("{{after}}", beforeFile.readText())
-                        .replace("{{before}}", afterFile.readText())
-                        .replace("{{fileName}}", afterFile.name)
-
-                    diffHtml.writeText(diff)
-                    val (linesAdded, linesRemoved) = countLinesAddedAndRemoved(beforeFile, afterFile)
-                    changedFiles.add(
-                        ChangedFile(
-                            beforeFile = beforeFile,
-                            afterFile = afterFile,
-                            diffHtml = diffHtml,
-                            linesAdded = linesAdded,
-                            linedRemoved = linesRemoved
-                        )
-                    )
-                }
-            }
-        }
-        return changedFiles
-    }
-
-
-    private fun findNewOrRemovedFiles(beforeFiles: List<File>, afterFiles: List<File>): List<File> {
-        val newFiles = mutableListOf<File>()
-        afterFiles.forEach { afterFile ->
-            if (!beforeFiles.any { beforeFile ->
-                    val beforeRelPath = beforeFile.relativeAndroidPath()
-                    val afterRelPath = afterFile.relativeAndroidPath()
-                    beforeRelPath == afterRelPath
-                }) {
-                newFiles.add(afterFile)
-            }
-        }
-        return newFiles
-    }
-
-    private fun findFrameworkFiles(files: List<File>): List<File> {
-        return files.filter { file ->
-            FRAMEWORK_PACKAGES.any { file.relativeAndroidPath().startsWith(it) }
-        }
-    }
-
-    private fun findLibraryFiles(files: List<File>): List<File> {
-        return files.filter { file ->
-            FRAMEWORK_PACKAGES.none { file.relativeAndroidPath().startsWith(it) }
-        }
-    }
-
-    private fun findAppFiles(files: List<File>): List<File> {
-        val appArgs = appRepo.args!!
-        return files.filter { file ->
-            appArgs.appPackages.any { file.relativeAndroidPath().startsWith(it) }
-        }
-    }
-
-    private fun File.relativeAndroidPath(): String {
-        return this.absolutePath.split("-decompiled/sources/").last()
-    }
 }
 
-private fun File.generatedDirName(): String {
-    return this.absolutePath.split("dex-diff-result/")[1].split("/")[0]
-}
+

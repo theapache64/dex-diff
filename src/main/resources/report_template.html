@@ -56,8 +56,8 @@
     <body>
         <div class="container">
             <h1>Dex Diff Report</h1>
-
-            <h3>Summary</h3>
+            <blockquote>{{apkFileDetails}}</blockquote>
+            <h2>Summary</h2>
             <!--APK details in table -->
             <table class="table table-bordered">
                 <thead>
@@ -141,6 +141,7 @@
                 </tbody>
             </table>
 
+            <h2>App Files</h2>
             <h3>🆕 New app files</h3>
             {{newAppFilesTable}}
 
@@ -153,6 +154,7 @@
             {{changedAppFilesTable}}
 
             <!--New files-->
+            <h2>Library Files</h2>
             <h3>🆕 New library files</h3>
             {{newLibraryFilesTable}}
 
@@ -166,6 +168,7 @@
 
 
             <!--New files-->
+            <h2>Framework files</h2>
             <h3>🆕 New framework files</h3>
             {{newFrameworkFilesTable}}
 
