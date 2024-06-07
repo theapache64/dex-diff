@@ -11,7 +11,7 @@ fun File.parsePackageName(): String {
 }
 
 class ReportMaker(
-    val apkFileDetails  :String,
+    val apkFileDetails: String,
     val appPackages: List<String>,
     private val beforeApkSizeInKb: Int,
     private val afterApkSizeInKb: Int,
@@ -19,8 +19,8 @@ class ReportMaker(
     private val beforeFilesCount: Int,
     private val afterFilesCount: Int,
 
-    private val beforeAppFilesCount : Int,
-    private val afterAppFilesCount : Int,
+    private val beforeAppFilesCount: Int,
+    private val afterAppFilesCount: Int,
 
     private val beforeFrameworkFilesCount: Int,
     private val afterFrameworkFilesCount: Int,
@@ -134,19 +134,45 @@ class ReportMaker(
             .replace("{{afterTotalFiles}}", "$afterFilesCount (100%)")
             .replace("{{diffTotalFiles}}", "${(afterFilesCount - beforeFilesCount).withSymbol()} files (100%)")
 
-            .replace("{{beforeAppFiles}}", "$beforeAppFilesCount (${((beforeAppFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{afterAppFiles}}", "$afterAppFilesCount (${((afterAppFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{diffAppFiles}}", "${(afterAppFilesCount - beforeAppFilesCount).withSymbol()} files (${(((afterAppFilesCount - beforeAppFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace(
+                "{{beforeAppFiles}}",
+                "$beforeAppFilesCount (${((beforeAppFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{afterAppFiles}}",
+                "$afterAppFilesCount (${((afterAppFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{diffAppFiles}}",
+                "${(afterAppFilesCount - beforeAppFilesCount).withSymbol()} files (${(((afterAppFilesCount - beforeAppFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
 
-            .replace("{{beforeTotalLibraryFiles}}", "$beforeLibraryFilesCount (${((beforeLibraryFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{afterTotalLibraryFiles}}", "$afterLibraryFilesCount (${((afterLibraryFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{diffTotalLibraryFiles}}", "${(afterLibraryFilesCount - beforeLibraryFilesCount).withSymbol()} files (${(((afterLibraryFilesCount - beforeLibraryFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace(
+                "{{beforeTotalLibraryFiles}}",
+                "$beforeLibraryFilesCount (${((beforeLibraryFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{afterTotalLibraryFiles}}",
+                "$afterLibraryFilesCount (${((afterLibraryFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{diffTotalLibraryFiles}}",
+                "${(afterLibraryFilesCount - beforeLibraryFilesCount).withSymbol()} files (${(((afterLibraryFilesCount - beforeLibraryFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
 
 
-
-            .replace("{{beforeTotalFrameworkFiles}}", "$beforeFrameworkFilesCount (${((beforeFrameworkFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{afterTotalFrameworkFiles}}", "$afterFrameworkFilesCount (${((afterFrameworkFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
-            .replace("{{diffTotalFrameworkFiles}}", "${(afterFrameworkFilesCount - beforeFrameworkFilesCount).withSymbol()} files (${(((afterFrameworkFilesCount - beforeFrameworkFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace(
+                "{{beforeTotalFrameworkFiles}}",
+                "$beforeFrameworkFilesCount (${((beforeFrameworkFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{afterTotalFrameworkFiles}}",
+                "$afterFrameworkFilesCount (${((afterFrameworkFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
+            .replace(
+                "{{diffTotalFrameworkFiles}}",
+                "${(afterFrameworkFilesCount - beforeFrameworkFilesCount).withSymbol()} files (${(((afterFrameworkFilesCount - beforeFrameworkFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)"
+            )
 
 
             .replace("{{beforeTotalClasses}}", "$beforeTotalClasses")
@@ -157,10 +183,25 @@ class ReportMaker(
             .replace("{{afterTotalMethods}}", "$afterTotalMethods")
             .replace("{{diffTotalMethods}}", "${(afterTotalMethods - beforeTotalMethods).withSymbol()} methods")
 
-            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedLibraryFiles.size + changedAppFiles.size} files")
+            .replace(
+                "{{changedFilesCount}}",
+                "${changedFrameworkFiles.size + changedLibraryFiles.size + changedAppFiles.size} files"
+            )
             .replace("{{changedLibraryFilesCount}}", "${changedLibraryFiles.size} files")
             .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size} files")
             .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
+
+            .replace("{{newAppFilesListCount}}", newAppFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{removedAppFilesListCount}}", removedAppFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{changedAppFilesListCount}}", changedAppFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+        
+            .replace("{{newLibraryFilesListCount}}", newLibraryFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{removedLibraryFilesListCount}}", removedLibraryFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{changedLibraryFilesListCount}}", changedLibraryFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+        
+            .replace("{{newFrameworkFilesListCount}}", newFrameworkFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{removedFrameworkFilesListCount}}", removedFrameworkFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
+            .replace("{{changedFrameworkFilesListCount}}", changedFrameworkFiles.size.takeIf { it > 0 }?.let { "($it files)" } ?: "")
     }
 
 
