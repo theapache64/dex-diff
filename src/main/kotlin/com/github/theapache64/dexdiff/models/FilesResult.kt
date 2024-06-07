@@ -42,8 +42,8 @@ fun createFileResult(
 ): FilesResult {
     val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
 
-    val beforeFiles = beforeReport.decompiledDir.walk().toList()
-    val afterFiles = afterReport.decompiledDir.walk().toList()
+    val beforeFiles = beforeReport.decompiledDir.walk().toList().filter { it.isFile }
+    val afterFiles = afterReport.decompiledDir.walk().toList().filter { it.isFile }
 
     val newFiles = mutableListOf<File>()
     val removedFiles = mutableListOf<File>()
@@ -76,20 +76,20 @@ fun createFileResult(
 
         newOrRemovedFiles = removedFiles,
 
-        newAppFiles = newAppFiles,
+        newAppFiles = null,
         beforeOrAfterAppFiles = beforeAppFiles,
         changedAppFiles = changedAppFiles,
-        removedAppFiles = null,
+        removedAppFiles = removedAppFiles,
 
-        newLibraryFiles = newLibraryFiles,
+        newLibraryFiles = null,
         beforeOrAfterLibraryFiles = beforeLibraryFiles,
         changedLibraryFiles = changedLibraryFiles,
-        removedLibraryFiles = null,
+        removedLibraryFiles = removedLibraryFiles,
 
-        newFrameworkFiles = newFrameworkFiles,
+        newFrameworkFiles = null,
         beforeOrAfterFrameworkFiles = beforeFrameworkFiles,
         changedFrameworkFiles = changedFrameworkFiles,
-        removedFrameworkFiles =  null,
+        removedFrameworkFiles = removedFrameworkFiles,
     )
 
     // after files loop
@@ -100,21 +100,33 @@ fun createFileResult(
         targetList = beforeFiles,
         newOrRemovedFiles = newFiles,
 
-        newAppFiles = null,
-        removedAppFiles = removedAppFiles,
+        newAppFiles = newAppFiles,
+        removedAppFiles = null,
         beforeOrAfterAppFiles = afterAppFiles,
         changedAppFiles = null,
 
-        newLibraryFiles = null,
-        removedLibraryFiles = removedLibraryFiles,
+        newLibraryFiles = newLibraryFiles,
+        removedLibraryFiles = null,
         beforeOrAfterLibraryFiles = afterLibraryFiles,
         changedLibraryFiles = null,
 
-        newFrameworkFiles = null,
-        removedFrameworkFiles = removedFrameworkFiles,
+        newFrameworkFiles = newFrameworkFiles,
+        removedFrameworkFiles = null,
         beforeOrAfterFrameworkFiles = afterFrameworkFiles,
         changedFrameworkFiles = null,
     )
+
+    // Verifying data
+    val expectedBeforeFilesCount = beforeLibraryFiles.size + beforeAppFiles.size + beforeFrameworkFiles.size
+    require(
+        expectedBeforeFilesCount == beforeFiles.size
+    ) { "Before files count mismatch: Expected: $expectedBeforeFilesCount, Actual: ${beforeFiles.size}" }
+
+    val expectedAfterFilesCount = afterLibraryFiles.size + afterAppFiles.size + afterFrameworkFiles.size
+    require(
+        expectedAfterFilesCount == afterFiles.size
+    ) { "After files count mismatch: Expected: $expectedAfterFilesCount, Actual: ${afterFiles.size}" }
+
 
     return FilesResult(
         beforeFiles = beforeFiles,
@@ -167,7 +179,7 @@ private fun fileLooper(
     changedFrameworkFiles: MutableList<ChangedFile>? = null
 
 ) {
-    sourceList.filter { it.isFile }.forEach { sourceFile ->
+    sourceList.forEach { sourceFile ->
 
         if (!targetList.any { afterFile ->
                 val beforeRelPath = sourceFile.relativeAndroidPath()

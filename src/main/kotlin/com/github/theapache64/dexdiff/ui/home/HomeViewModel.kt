@@ -131,6 +131,8 @@ class HomeViewModel @Inject constructor(
 
         ).make()
 
+        println("QuickTag: HomeViewModel:init: Verifying data...")
+
         _status.value =
             "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
