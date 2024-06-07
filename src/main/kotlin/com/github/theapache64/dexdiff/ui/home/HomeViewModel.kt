@@ -72,17 +72,17 @@ class HomeViewModel @Inject constructor(
 
         val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
 
-        // focused files
-        val beforeFocusedFiles = findFocusedFiles(beforeFiles)
-        val afterFocusedFiles = findFocusedFiles(afterFiles)
-        val changedFocusedFiles = findContentChangedFiles(beforeFocusedFiles, afterSrcDirName)
-
         // app files
-        val beforeAppFiles = findAppFiles(beforeFiles) - beforeFocusedFiles.toSet()
-        val afterAppFiles = findAppFiles(afterFiles) - afterFocusedFiles.toSet()
-        val beforeTotalAppFiles = beforeAppFiles.size
-        val afterTotalAppFiles = afterAppFiles.size
+        val beforeAppFiles = findAppFiles(beforeFiles)
+        val afterAppFiles = findAppFiles(afterFiles)
         val changedAppFiles = findContentChangedFiles(beforeAppFiles, afterSrcDirName)
+
+        // library files
+        val beforeLibraryFiles = findLibraryFiles(beforeFiles) - beforeAppFiles.toSet()
+        val afterLibraryFiles = findLibraryFiles(afterFiles) - afterAppFiles.toSet()
+        val beforeTotalLibraryFiles = beforeLibraryFiles.size
+        val afterTotalLibraryFiles = afterLibraryFiles.size
+        val changedLibraryFiles = findContentChangedFiles(beforeLibraryFiles, afterSrcDirName)
 
         // framework files
         val beforeFrameworkFiles = findFrameworkFiles(beforeFiles)
@@ -94,18 +94,21 @@ class HomeViewModel @Inject constructor(
         _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
 
         val reportFile = ReportMaker(
-            focusedPackages = appArgs.focusedPackages,
+            appPackages = appArgs.appPackages,
             beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
             afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
 
-            beforeTotalFiles = beforeFiles.size,
-            afterTotalFiles = afterFiles.size,
+            beforeFilesCount = beforeFiles.size,
+            afterFilesCount = afterFiles.size,
 
-            beforeTotalFrameworkFiles = beforeTotalFrameworkFiles,
-            afterTotalFrameworkFiles = afterTotalFrameworkFiles,
+            beforeAppFilesCount = beforeAppFiles.size,
+            afterAppFilesCount = afterAppFiles.size,
 
-            beforeTotalAppFiles = beforeTotalAppFiles,
-            afterTotalAppFiles = afterTotalAppFiles,
+            beforeFrameworkFilesCount = beforeTotalFrameworkFiles,
+            afterFrameworkFilesCount = afterTotalFrameworkFiles,
+
+            beforeLibraryFilesCount = beforeTotalLibraryFiles,
+            afterLibraryFilesCount = afterTotalLibraryFiles,
 
 
             beforeTotalClasses = beforeReport.totalClasses,
@@ -114,17 +117,17 @@ class HomeViewModel @Inject constructor(
             beforeTotalMethods = beforeReport.totalMethods,
             afterTotalMethods = afterReport.totalMethods,
 
-            newFocusedFiles = findFocusedFiles(newFiles),
-            removedFocusedFiles = findFocusedFiles(removedFiles),
-            changedFocusedFiles = changedFocusedFiles,
+            newAppFiles = findAppFiles(newFiles),
+            removedAppFiles = findAppFiles(removedFiles),
+            changedAppFiles = changedAppFiles,
 
             newFrameworkFiles = findFrameworkFiles(newFiles),
             removedFrameworkFiles = findFrameworkFiles(removedFiles),
             changedFrameworkFiles = changedFrameworkFiles,
 
-            newAppFiles = findAppFiles(newFiles),
-            removedAppFiles = findAppFiles(removedFiles),
-            changedAppFiles = changedAppFiles
+            newLibraryFiles = findLibraryFiles(newFiles),
+            removedLibraryFiles = findLibraryFiles(removedFiles),
+            changedLibraryFiles = changedLibraryFiles
 
         ).make()
 
@@ -214,16 +217,16 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun findAppFiles(files: List<File>): List<File> {
+    private fun findLibraryFiles(files: List<File>): List<File> {
         return files.filter { file ->
             FRAMEWORK_PACKAGES.none { file.relativeAndroidPath().startsWith(it) }
         }
     }
 
-    private fun findFocusedFiles(files: List<File>): List<File> {
+    private fun findAppFiles(files: List<File>): List<File> {
         val appArgs = appRepo.args!!
         return files.filter { file ->
-            appArgs.focusedPackages.any { file.relativeAndroidPath().startsWith(it) }
+            appArgs.appPackages.any { file.relativeAndroidPath().startsWith(it) }
         }
     }
 

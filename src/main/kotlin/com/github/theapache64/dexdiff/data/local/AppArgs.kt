@@ -5,5 +5,5 @@ import java.io.File
 data class AppArgs(
     val beforeApk: File,
     val afterApk: File,
-    val focusedPackages : List<String>
+    val appPackages : List<String>
 )

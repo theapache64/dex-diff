@@ -20,6 +20,7 @@
                 width: 100%;
                 border-collapse: separate; /* Don't collapse */
                 border-spacing: 0;
+                table-layout: fixed;
             }
 
             table th {
@@ -33,6 +34,10 @@
                 /* For cells, apply the border to one of each side only (right but not left, bottom but not top) */
                 border-bottom: 2px solid;
                 border-right: 2px solid;
+            }
+
+            td {
+                word-wrap: break-word;
             }
 
             table th:first-child,
@@ -49,7 +54,7 @@
         </style>
     </head>
     <body>
-        <div class="container-fluid">
+        <div class="container">
             <h1>Dex Diff Report</h1>
 
             <h3>Summary</h3>
@@ -78,17 +83,26 @@
                     </tr>
 
                     <tr>
+                        <td>Total app files</td>
+                        <td>{{beforeAppFiles}}</td>
+                        <td>{{afterAppFiles}}</td>
+                        <td>{{diffAppFiles}}</td>
+                    </tr>
+
+
+                    <tr>
+                        <td>Total library files</td>
+                        <td>{{beforeTotalLibraryFiles}}</td>
+                        <td>{{afterTotalLibraryFiles}}</td>
+                        <td>{{diffTotalLibraryFiles}}</td>
+                    </tr>
+
+
+                    <tr>
                         <td>Total framework files</td>
                         <td>{{beforeTotalFrameworkFiles}}</td>
                         <td>{{afterTotalFrameworkFiles}}</td>
                         <td>{{diffTotalFrameworkFiles}}</td>
-                    </tr>
-
-                    <tr>
-                        <td>Total app files</td>
-                        <td>{{beforeTotalAppFiles}}</td>
-                        <td>{{afterTotalAppFiles}}</td>
-                        <td>{{diffTotalAppFiles}}</td>
                     </tr>
 
                     <tr>
@@ -110,13 +124,13 @@
                     </tr>
 
                     <tr>
-                        <td>Changed focused files</td>
-                        <td colspan="3" style="text-align: center;">{{changedFocusedFilesCount}}</td>
+                        <td>Changed app files</td>
+                        <td colspan="3" style="text-align: center;">{{changedAppFilesCount}}</td>
                     </tr>
 
                     <tr>
-                        <td>Changed app files</td>
-                        <td colspan="3" style="text-align: center;">{{changedAppFilesCount}}</td>
+                        <td>Changed library files</td>
+                        <td colspan="3" style="text-align: center;">{{changedLibraryFilesCount}}</td>
                     </tr>
 
                     <tr>
@@ -127,18 +141,6 @@
                 </tbody>
             </table>
 
-            <h3>🆕 New focused files</h3>
-            {{newFocusedFilesTable}}
-
-            <!--Removed files-->
-            <h3>❌️ Removed focused files</h3>
-            {{removedFocusedFilesTable}}
-
-            <!--Changed files-->
-            <h3>🔄 Changed focused files</h3>
-            {{changedFocusedFilesTable}}
-
-            <!--New files-->
             <h3>🆕 New app files</h3>
             {{newAppFilesTable}}
 
@@ -149,6 +151,18 @@
             <!--Changed files-->
             <h3>🔄 Changed app files</h3>
             {{changedAppFilesTable}}
+
+            <!--New files-->
+            <h3>🆕 New library files</h3>
+            {{newLibraryFilesTable}}
+
+            <!--Removed files-->
+            <h3>❌️ Removed library files</h3>
+            {{removedLibraryFilesTable}}
+
+            <!--Changed files-->
+            <h3>🔄 Changed library files</h3>
+            {{changedLibraryFilesTable}}
 
 
             <!--New files-->

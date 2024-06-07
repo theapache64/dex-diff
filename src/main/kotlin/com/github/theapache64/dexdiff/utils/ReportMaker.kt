@@ -11,18 +11,21 @@ fun File.parsePackageName(): String {
 }
 
 class ReportMaker(
-    val focusedPackages: List<String>,
+    val appPackages: List<String>,
     private val beforeApkSizeInKb: Int,
     private val afterApkSizeInKb: Int,
 
-    private val beforeTotalFiles: Int,
-    private val afterTotalFiles: Int,
+    private val beforeFilesCount: Int,
+    private val afterFilesCount: Int,
 
-    private val beforeTotalFrameworkFiles: Int,
-    private val afterTotalFrameworkFiles: Int,
+    private val beforeAppFilesCount : Int,
+    private val afterAppFilesCount : Int,
 
-    private val beforeTotalAppFiles: Int,
-    private val afterTotalAppFiles: Int,
+    private val beforeFrameworkFilesCount: Int,
+    private val afterFrameworkFilesCount: Int,
+
+    private val beforeLibraryFilesCount: Int,
+    private val afterLibraryFilesCount: Int,
 
 
     private val beforeTotalClasses: Int,
@@ -35,13 +38,13 @@ class ReportMaker(
     private val removedFrameworkFiles: List<File>,
     private val changedFrameworkFiles: List<ChangedFile>,
 
-    private val newFocusedFiles: List<File>,
-    private val removedFocusedFiles: List<File>,
-    private val changedFocusedFiles: List<ChangedFile>,
-
     private val newAppFiles: List<File>,
     private val removedAppFiles: List<File>,
-    private val changedAppFiles: List<ChangedFile>
+    private val changedAppFiles: List<ChangedFile>,
+
+    private val newLibraryFiles: List<File>,
+    private val removedLibraryFiles: List<File>,
+    private val changedLibraryFiles: List<ChangedFile>
 
 ) {
 
@@ -58,29 +61,29 @@ class ReportMaker(
             "These are files inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory with content changes"
 
         val appNote = "These are files outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' and '${
-            focusedPackages.joinToString(",")
+            appPackages.joinToString(",")
         }' directory"
         val appChangedNote =
             "These are files outside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' and '${
-                focusedPackages.joinToString(",")
+                appPackages.joinToString(",")
             }' directory with content changes"
 
         val fullReport = reportFile.readText()
             .addReportSummary()
             .add(
-                files = newAppFiles,
+                files = newLibraryFiles,
                 note = appNote,
-                key = "newAppFilesTable"
+                key = "newLibraryFilesTable"
             )
             .add(
-                files = removedAppFiles,
+                files = removedLibraryFiles,
                 note = appNote,
-                key = "removedAppFilesTable"
+                key = "removedLibraryFilesTable"
             )
             .addChangedFiles(
-                files = changedAppFiles,
+                files = changedLibraryFiles,
                 note = appChangedNote,
-                replaceKey = "changedAppFilesTable"
+                replaceKey = "changedLibraryFilesTable"
             )
             .add(
                 files = newFrameworkFiles,
@@ -98,19 +101,19 @@ class ReportMaker(
                 replaceKey = "changedFrameworkFilesTable"
             )
             .add(
-                files = newFocusedFiles,
-                note = "These are files inside '${focusedPackages.joinToString(",")}'",
-                key = "newFocusedFilesTable"
+                files = newAppFiles,
+                note = "These are files inside '${appPackages.joinToString(",")}'",
+                key = "newAppFilesTable"
             )
             .add(
-                files = removedFocusedFiles,
-                note = "These are files inside '${focusedPackages.joinToString(",")}'",
-                key = "removedFocusedFilesTable"
+                files = removedAppFiles,
+                note = "These are files inside '${appPackages.joinToString(",")}'",
+                key = "removedAppFilesTable"
             )
             .addChangedFiles(
-                files = changedFocusedFiles,
-                note = "These are files inside '${focusedPackages.joinToString(",")}' with content changes",
-                replaceKey = "changedFocusedFilesTable"
+                files = changedAppFiles,
+                note = "These are files inside '${appPackages.joinToString(",")}' with content changes",
+                replaceKey = "changedAppFilesTable"
             )
 
 
@@ -125,32 +128,24 @@ class ReportMaker(
             .replace("{{afterApkSize}}", "$afterApkSizeInKb KB")
             .replace("{{diffApkSize}}", "${(afterApkSizeInKb - beforeApkSizeInKb).withSymbol()} KB")
 
-            .replace("{{beforeTotalFiles}}", "$beforeTotalFiles (100%)")
-            .replace("{{afterTotalFiles}}", "$afterTotalFiles (100%)")
-            .replace("{{diffTotalFiles}}", "${(afterTotalFiles - beforeTotalFiles).withSymbol()} files")
+            .replace("{{beforeTotalFiles}}", "$beforeFilesCount (100%)")
+            .replace("{{afterTotalFiles}}", "$afterFilesCount (100%)")
+            .replace("{{diffTotalFiles}}", "${(afterFilesCount - beforeFilesCount).withSymbol()} files (100%)")
 
-            .replace(
-                "{{beforeTotalFrameworkFiles}}",
-                "$beforeTotalFrameworkFiles (${((beforeTotalFrameworkFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
-            )
-            .replace(
-                "{{afterTotalFrameworkFiles}}",
-                "$afterTotalFrameworkFiles (${((afterTotalFrameworkFiles / afterTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
-            )
-            .replace(
-                "{{diffTotalFrameworkFiles}}",
-                "${(afterTotalFrameworkFiles - beforeTotalFrameworkFiles).withSymbol()} files"
-            )
+            .replace("{{beforeAppFiles}}", "$beforeAppFilesCount (${((beforeAppFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{afterAppFiles}}", "$afterAppFilesCount (${((afterAppFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{diffAppFiles}}", "${(afterAppFilesCount - beforeAppFilesCount).withSymbol()} files (${(((afterAppFilesCount - beforeAppFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
 
-            .replace(
-                "{{beforeTotalAppFiles}}",
-                "$beforeTotalAppFiles (${((beforeTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
-            )
-            .replace(
-                "{{afterTotalAppFiles}}",
-                "$afterTotalAppFiles (${((afterTotalAppFiles / beforeTotalFiles.toFloat()) * 100).roundToTwoDecimals()}%)"
-            )
-            .replace("{{diffTotalAppFiles}}", "${(afterTotalAppFiles - beforeTotalAppFiles).withSymbol()} files")
+            .replace("{{beforeTotalLibraryFiles}}", "$beforeLibraryFilesCount (${((beforeLibraryFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{afterTotalLibraryFiles}}", "$afterLibraryFilesCount (${((afterLibraryFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{diffTotalLibraryFiles}}", "${(afterLibraryFilesCount - beforeLibraryFilesCount).withSymbol()} files (${(((afterLibraryFilesCount - beforeLibraryFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
+
+
+
+            .replace("{{beforeTotalFrameworkFiles}}", "$beforeFrameworkFilesCount (${((beforeFrameworkFilesCount / beforeFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{afterTotalFrameworkFiles}}", "$afterFrameworkFilesCount (${((afterFrameworkFilesCount / afterFilesCount.toFloat()) * 100).roundToTwoDecimals()}%)")
+            .replace("{{diffTotalFrameworkFiles}}", "${(afterFrameworkFilesCount - beforeFrameworkFilesCount).withSymbol()} files (${(((afterFrameworkFilesCount - beforeFrameworkFilesCount) / (afterFilesCount - beforeFilesCount).toFloat()) * 100).roundToTwoDecimals()}%)")
+
 
             .replace("{{beforeTotalClasses}}", "$beforeTotalClasses")
             .replace("{{afterTotalClasses}}", "$afterTotalClasses")
@@ -160,10 +155,10 @@ class ReportMaker(
             .replace("{{afterTotalMethods}}", "$afterTotalMethods")
             .replace("{{diffTotalMethods}}", "${(afterTotalMethods - beforeTotalMethods).withSymbol()} methods")
 
-            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedAppFiles.size + changedFocusedFiles.size} files")
-            .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
+            .replace("{{changedFilesCount}}", "${changedFrameworkFiles.size + changedLibraryFiles.size + changedAppFiles.size} files")
+            .replace("{{changedLibraryFilesCount}}", "${changedLibraryFiles.size} files")
             .replace("{{changedFrameworkFilesCount}}", "${changedFrameworkFiles.size} files")
-            .replace("{{changedFocusedFilesCount}}", "${changedFocusedFiles.size} files")
+            .replace("{{changedAppFilesCount}}", "${changedAppFiles.size} files")
     }
 
 
@@ -239,9 +234,9 @@ class ReportMaker(
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>File</th>
-                                <th>Package</th>
-                                <th>Lines</th>
+                                <th style="width: 60%;">File</th>
+                                <th style="width: 28%;">Package</th>
+                                <th style="width: 12%;">Lines</th>
                             </tr>
                         </thead>
                         <tbody>
