@@ -71,14 +71,14 @@ class HomeViewModel @Inject constructor(
 
         val afterFrameworkFiles = findFrameworkFiles(afterFiles)
         val beforeFrameworkFiles = findFrameworkFiles(afterFiles)
-        val beforeTotalFrameworkFiles = afterFrameworkFiles.size
-        val afterTotalFrameworkFiles = findFrameworkFiles(afterFiles).size
+        val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
+        val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
         val afterAppFiles = findAppFiles(afterFiles)
         val beforeAppFiles = findAppFiles(beforeFiles)
         val afterFocusedFiles = findFocusedFiles(afterFiles)
-        val beforeTotalAppFiles = afterAppFiles.size
-        val afterTotalAppFiles = findAppFiles(afterFiles).size
+        val beforeTotalAppFiles = beforeAppFiles.size
+        val afterTotalAppFiles = afterAppFiles.size
 
 
         val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
