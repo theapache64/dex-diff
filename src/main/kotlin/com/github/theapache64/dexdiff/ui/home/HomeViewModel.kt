@@ -140,8 +140,10 @@ class HomeViewModel @Inject constructor(
 
             newLibraryFiles = filesResult.newLibraryFiles,
             removedLibraryFiles = filesResult.removedLibraryFiles,
-            changedLibraryFiles = filesResult.changedLibraryFiles
+            changedLibraryFiles = filesResult.changedLibraryFiles,
 
+            beforeDexMeta = filesResult.beforeDexMeta,
+            afterDexMeta = filesResult.afterDexMeta,
         ).make()
 
         println("QuickTag: HomeViewModel:init: Verifying data...")

@@ -33,6 +33,9 @@ data class FilesResult(
     val newFrameworkFiles: List<File>,
     val removedFrameworkFiles: List<File>,
     val changedFrameworkFiles: List<ChangedFile>,
+
+    val beforeDexMeta: Map<String, DexMeta>,
+    val afterDexMeta: Map<String, DexMeta>
 )
 
 
@@ -162,8 +165,9 @@ fun createFileResult(
         newFrameworkFiles = newFrameworkFiles,
         removedFrameworkFiles = removedFrameworkFiles,
         changedFrameworkFiles = changedFrameworkFiles,
-
-        )
+        beforeDexMeta = beforeDexMeta,
+        afterDexMeta = afterDexMeta
+    )
 }
 
 private fun File.generatedDirName(): String {
@@ -200,7 +204,7 @@ private fun fileLooper(
             .map { it.split("*/")[0].trim() }
 
         for (dex in dexList) {
-            if(dex.isNotBlank()){
+            if (dex.isNotBlank()) {
                 dexMeta.getOrPut(dex) {
                     DexMeta(
                         dexFileName = dex,

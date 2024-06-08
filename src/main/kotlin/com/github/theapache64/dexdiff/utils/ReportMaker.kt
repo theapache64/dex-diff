@@ -1,5 +1,6 @@
 package com.github.theapache64.dexdiff.utils
 
+import com.github.theapache64.dexdiff.data.local.DexMeta
 import com.github.theapache64.dexdiff.models.ChangedFile
 import com.github.theapache64.dexdiff.ui.home.HomeViewModel
 import java.io.File
@@ -45,8 +46,9 @@ class ReportMaker(
 
     private val newLibraryFiles: List<File>,
     private val removedLibraryFiles: List<File>,
-    private val changedLibraryFiles: List<ChangedFile>
-
+    private val changedLibraryFiles: List<ChangedFile>,
+    private val beforeDexMeta: Map<String, DexMeta>,
+    private val afterDexMeta: Map<String, DexMeta>
 ) {
 
 
@@ -70,6 +72,7 @@ class ReportMaker(
 
         val fullReport = reportFile.readText()
             .addReportSummary()
+            .addDexFilesTable()
             .add(
                 files = newLibraryFiles,
                 note = appNote,
@@ -230,12 +233,58 @@ class ReportMaker(
         return this.replace("{{$key}}", table.toString())
     }
 
+
+    private fun String.addDexFilesTable(): String {
+        val tableBuilder = StringBuilder()
+        val dexFiles = beforeDexMeta.keys + afterDexMeta.keys
+        for(dexFile in dexFiles){
+            val beforeMeta = beforeDexMeta[dexFile]
+            val afterMeta = afterDexMeta[dexFile]
+            tableBuilder.append(
+                """
+                <tr>
+                    <td>${dexFile}</td>
+                    <td>
+                        
+                        ${beforeMeta?.sizeInKb ?: 0} KB
+                    </td>
+                    <td>
+                        
+                        ${afterMeta?.sizeInKb ?: 0} KB
+                    </td>
+                    <td>
+                        ${afterMeta?.sizeInKb?.minus(beforeMeta?.sizeInKb ?: 0)?.withSymbol()} KB
+                    </td>
+                </tr>
+            """.trimIndent()
+            )
+        }
+        val table  = """
+            <div class="tableContainer">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">File</th>
+                            <th style="width: 20%;">Before</th>
+                            <th style="width: 20%;">After</th>
+                            <th style="width: 20%;">Diff</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        $tableBuilder
+                    </tbody>
+                </table>
+            </div>
+        """.trimIndent()
+        return this.replace("{{dexFilesTable}}", table)
+    }
+
     private fun String.addChangedFiles(
         files: List<ChangedFile>,
         note: String,
         replaceKey: String,
     ): String {
-        val table = StringBuilder()
+        val tableBuilder = StringBuilder()
 
         val tableBody = files
             .sortedByDescending { changedFile -> changedFile.linesAdded + changedFile.linedRemoved }
@@ -249,8 +298,8 @@ class ReportMaker(
             """.trimIndent()
             }
 
-        buildTable(table = table, note = note, tableBody = tableBody, isTableEmpty = files.isEmpty())
-        return this.replace("{{$replaceKey}}", table.toString())
+        buildTable(table = tableBuilder, note = note, tableBody = tableBody, isTableEmpty = files.isEmpty())
+        return this.replace("{{$replaceKey}}", tableBuilder.toString())
     }
 
     private fun buildTable(table: StringBuilder, note: String, tableBody: String, isTableEmpty: Boolean) {
@@ -302,6 +351,7 @@ class ReportMaker(
 
 
 }
+
 
 fun String.readAsResource(): String {
     val classloader = Thread.currentThread().contextClassLoader
