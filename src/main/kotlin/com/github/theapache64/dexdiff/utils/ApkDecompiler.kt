@@ -10,6 +10,7 @@ import java.util.*
 
 data class DecompileReport(
     val decompiledDir: File,
+    val sourceDir: File,
     val totalFiles: Int,
     val totalClasses: Int,
     val totalMethods: Int
@@ -20,8 +21,12 @@ class ApkDecompiler(
 ) {
 
     fun cachedBefore(): DecompileReport {
+        val decompiledDir = File("dex-diff-result/").listFiles()?.find {
+            it.absolutePath.contains("without-fullmode")
+        } ?: error("after decompiled dir not found")
         return DecompileReport(
-            decompiledDir = File("dex-diff-result/without-fullmode-2024_06_07__12_08_15-decompiled/sources"),
+            decompiledDir = decompiledDir,
+            sourceDir = decompiledDir.resolve("sources"),
             totalFiles = 1765,
             totalClasses = 2086,
             totalMethods = 6774
@@ -29,8 +34,12 @@ class ApkDecompiler(
     }
 
     fun cachedAfter(): DecompileReport {
+        val decompiledDir = File("dex-diff-result/").listFiles()?.find {
+            it.absolutePath.contains("with-fullmode")
+        } ?: error("after decompiled dir not found")
         return DecompileReport(
-            decompiledDir = File("dex-diff-result/with-fullmode-2024_06_07__12_08_19-decompiled/sources"),
+            decompiledDir = decompiledDir,
+            sourceDir = decompiledDir.resolve("sources"),
             totalFiles = 1088,
             totalClasses = 1240,
             totalMethods = 5359
@@ -54,7 +63,8 @@ class ApkDecompiler(
         }
         val sourceDir = decompiledDir.resolve("sources")
         return DecompileReport(
-            decompiledDir = sourceDir,
+            decompiledDir = decompiledDir,
+            sourceDir = sourceDir,
             totalFiles = sourceDir.walk().toList().filter { it.isFile }.size,
             totalClasses = totalClasses,
             totalMethods = totalMethods

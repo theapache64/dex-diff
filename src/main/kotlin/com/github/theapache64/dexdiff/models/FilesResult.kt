@@ -2,6 +2,7 @@ package com.github.theapache64.dexdiff.models
 
 import com.github.difflib.DiffUtils
 import com.github.difflib.patch.DeltaType
+import com.github.theapache64.dexdiff.data.local.DexMeta
 import com.github.theapache64.dexdiff.ui.home.HomeViewModel
 import com.github.theapache64.dexdiff.utils.DecompileReport
 import com.github.theapache64.dexdiff.utils.readAsResource
@@ -40,10 +41,10 @@ fun createFileResult(
     beforeReport: DecompileReport,
     afterReport: DecompileReport
 ): FilesResult {
-    val afterSrcDirName = afterReport.decompiledDir.generatedDirName()
+    val afterSrcDirName = afterReport.sourceDir.generatedDirName()
 
-    val beforeFiles = beforeReport.decompiledDir.walk().toList().filter { it.isFile }
-    val afterFiles = afterReport.decompiledDir.walk().toList().filter { it.isFile }
+    val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
+    val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
 
     val newFiles = mutableListOf<File>()
     val removedFiles = mutableListOf<File>()
@@ -66,12 +67,16 @@ fun createFileResult(
     val afterFrameworkFiles = mutableListOf<File>()
     val changedFrameworkFiles = mutableListOf<ChangedFile>()
 
+    val beforeDexMeta = mutableMapOf<String, DexMeta>()
+    val afterDexMeta = mutableMapOf<String, DexMeta>()
+
 
     // before files loop
     fileLooper(
         appPackages = appPackages,
         afterSrcDirName = afterSrcDirName,
         sourceList = beforeFiles,
+        dexMeta = beforeDexMeta,
         targetList = afterFiles,
 
         newOrRemovedFiles = removedFiles,
@@ -97,6 +102,7 @@ fun createFileResult(
         appPackages = appPackages,
         afterSrcDirName = afterSrcDirName,
         sourceList = afterFiles,
+        dexMeta = afterDexMeta,
         targetList = beforeFiles,
         newOrRemovedFiles = newFiles,
 
@@ -127,6 +133,14 @@ fun createFileResult(
         expectedAfterFilesCount == afterFiles.size
     ) { "After files count mismatch: Expected: $expectedAfterFilesCount, Actual: ${afterFiles.size}" }
 
+    // Set .dex file size
+    beforeDexMeta.forEach { (dexFileName, dexMeta) ->
+        dexMeta.sizeInKb = beforeReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+    }
+
+    afterDexMeta.forEach { (dexFileName, dexMeta) ->
+        dexMeta.sizeInKb = afterReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+    }
 
     return FilesResult(
         beforeFiles = beforeFiles,
@@ -176,10 +190,28 @@ private fun fileLooper(
     newFrameworkFiles: MutableList<File>?,
     removedFrameworkFiles: MutableList<File>?,
     beforeOrAfterFrameworkFiles: MutableList<File>,
-    changedFrameworkFiles: MutableList<ChangedFile>? = null
-
+    changedFrameworkFiles: MutableList<ChangedFile>? = null,
+    dexMeta: MutableMap<String, DexMeta>
 ) {
     sourceList.forEach { sourceFile ->
+
+        val dexList = sourceFile.readText().split("/* loaded from: ")
+            .filter { it.startsWith("classes") }
+            .map { it.split("*/")[0].trim() }
+
+        for (dex in dexList) {
+            if(dex.isNotBlank()){
+                dexMeta.getOrPut(dex) {
+                    DexMeta(
+                        dexFileName = dex,
+                        sizeInKb = 0,
+                        classesCount = 0
+                    )
+                }.let {
+                    it.classesCount += dexList.size
+                }
+            }
+        }
 
         if (!targetList.any { afterFile ->
                 val beforeRelPath = sourceFile.relativeAndroidPath()
@@ -187,6 +219,7 @@ private fun fileLooper(
                 beforeRelPath == afterRelPath
             }
         ) {
+
             newOrRemovedFiles.add(sourceFile)
 
             if (sourceFile.isAppFile(appPackages) && newAppFiles != null) {

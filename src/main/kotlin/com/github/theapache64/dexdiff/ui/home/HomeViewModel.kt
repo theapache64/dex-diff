@@ -1,5 +1,6 @@
 package com.github.theapache64.dexdiff.ui.home
 
+import com.github.theapache64.dexdiff.data.local.DexMeta
 import com.github.theapache64.dexdiff.data.repo.AppRepo
 import com.github.theapache64.dexdiff.models.createFileResult
 import com.github.theapache64.dexdiff.utils.ApkDecompiler
@@ -41,7 +42,7 @@ class HomeViewModel @Inject constructor(
         }
 
         _status.value = "➡️ Deleting old results..."
-        val isDebug = false
+        val isDebug = true
         if (!isDebug) {
             File("dex-diff-result").deleteRecursively()
         }
@@ -58,13 +59,15 @@ class HomeViewModel @Inject constructor(
         } else {
             ApkDecompiler(appArgs.afterApk).decompile()
         }
+
+        val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
+        val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
+
         _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
 
         // Find newly added files
         _status.value = "➡️ finding newly added files: "
         startTime = System.currentTimeMillis()
-        val beforeFiles = beforeReport.decompiledDir.walk().toList().filter { it.isFile }
-        val afterFiles = afterReport.decompiledDir.walk().toList().filter { it.isFile }
         _status.value = "➡️ files are ready to compare"
         _status.value = "➡️ beforeFiles count : ${beforeFiles.size}"
         _status.value = "➡️ afterFiles count : ${afterFiles.size}"
@@ -147,6 +150,10 @@ class HomeViewModel @Inject constructor(
             "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
+}
+
+private fun <E> parseDexMeta(): DexMeta {
+    TODO("Not yet implemented")
 }
 
 
