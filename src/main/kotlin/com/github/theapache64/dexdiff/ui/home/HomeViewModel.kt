@@ -61,7 +61,7 @@ class HomeViewModel @Inject constructor(
         _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
 
         // Find newly added files
-        _status.value = "➡️ Finding newly added files: "
+        _status.value = "➡️ finding newly added files: "
         startTime = System.currentTimeMillis()
         val beforeFiles = beforeReport.decompiledDir.walk().toList().filter { it.isFile }
         val afterFiles = afterReport.decompiledDir.walk().toList().filter { it.isFile }

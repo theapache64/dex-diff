@@ -2,13 +2,27 @@
 
 # dex-diff
 
-![buildStatus](https://img.shields.io/github/workflow/status/theapache64/compose-terminal-template/Java%20CI%20with%20Gradle?style=plastic)
-![latestVersion](https://img.shields.io/github/v/release/theapache64/compose-terminal-template)
+![buildStatus](https://img.shields.io/github/workflow/status/theapache64/dex-diff/Java%20CI%20with%20Gradle?style=plastic)
+![latestVersion](https://img.shields.io/github/v/release/theapache64/dex-diff)
 <a href="https://twitter.com/theapache64" target="_blank">
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
-> A project template to create Compose based terminal app in an Android-ish way
+> A tool to compare two APK files at dex level
+
+### ✨ Demo
+
+![](demo.gif)
+
+## 🦿 Prerequisites
+
+- Java 8 or above
+
+## ⌨️ Usage
+
+1. Step 1
+1. Step 2
+1. Step 3
 
 
 ## ✍️ Author
@@ -46,18 +60,11 @@ Give a ⭐️ if this project helped you!
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="160">
 </a>
 
-<a href="https://www.paypal.me/theapache64" target="_blank">
-    <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donation" width="160">
-</a>
-
-## ☑️ TODO
-
-- [ ] Task 1
 
 ## 📝 License
 
 ```
-Copyright © 2022 - theapache64
+Copyright © 2024 - theapache64
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
