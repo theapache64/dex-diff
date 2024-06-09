@@ -17,7 +17,7 @@ class HomeViewModel @Inject constructor(
 ) {
 
     companion object {
-        const val INIT_MSG = "➡️ initialising..."
+        const val INIT_MSG = "🚀 Initialising..."
         const val DONE_MSG = "✅ Done"
 
         val FRAMEWORK_PACKAGES = listOf(
@@ -41,10 +41,14 @@ class HomeViewModel @Inject constructor(
             "Arguments not found"
         }
 
-        _status.value = "➡️ Deleting old results..."
+        val file = File("dex-diff-result")
         val isDebug = false
-        if (!isDebug) {
-            File("dex-diff-result").deleteRecursively()
+        if (file.exists()) {
+            if (!isDebug) {
+                _status.value = "➡️ Deleting old results (${file.name})..."
+                file.deleteRecursively()
+                _status.value = "✅ Deleted old results"
+            }
         }
         _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
@@ -53,34 +57,26 @@ class HomeViewModel @Inject constructor(
         } else {
             ApkDecompiler(appArgs.beforeApk).decompile()
         }
+        _status.value = "✅ Decompiling before APK finished"
         _status.value = "➡️ Decompiling after APK... (this may take some time)"
         val afterReport = if (isDebug) {
             ApkDecompiler(appArgs.afterApk).cachedAfter()
         } else {
             ApkDecompiler(appArgs.afterApk).decompile()
         }
+        _status.value = "✅ Decompiling after APK finished"
+        _status.value = "✅ Decompile finished (${System.currentTimeMillis() - startTime}ms)"
 
+
+        startTime = System.currentTimeMillis()
+        _status.value = "➡️ Comparing before and after... (this may take some time)"
         val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
         val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
-
-        _status.value = "⏱\uFE0F ➡️ Decompiled finished. Took ${System.currentTimeMillis() - startTime}ms "
-
-        // Find newly added files
-        _status.value = "➡️ finding newly added files: "
-        startTime = System.currentTimeMillis()
-        _status.value = "➡️ files are ready to compare"
-        _status.value = "➡️ beforeFiles count : ${beforeFiles.size}"
-        _status.value = "➡️ afterFiles count : ${afterFiles.size}"
-        _status.value = "➡️ comparing..."
-
         val filesResult = createFileResult(
             appPackages = appArgs.appPackages,
             beforeReport = beforeReport,
             afterReport = afterReport
         )
-
-        _status.value = "➡️ new files count: ${filesResult.newFiles.size}"
-        _status.value = "➡️ removed files count: ${filesResult.removedFiles.size}"
 
         // app files
         val beforeAppFiles = filesResult.beforeAppFiles
@@ -99,8 +95,9 @@ class HomeViewModel @Inject constructor(
         val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
         val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
-        _status.value = "⏱\uFE0F ➡️ Analysis took ${System.currentTimeMillis() - startTime}ms "
+        _status.value = "✅ Comparing finished (${System.currentTimeMillis() - startTime}ms)"
 
+        _status.value = "➡️ Making report..."
         val reportFile = ReportMaker(
             apkFileDetails = """
                 Before: <code>${appArgs.beforeApk.name}</code> </br> 
@@ -146,10 +143,7 @@ class HomeViewModel @Inject constructor(
             afterDexMeta = filesResult.afterDexMeta,
         ).make()
 
-        println("QuickTag: HomeViewModel:init: Verifying data...")
-
-        _status.value =
-            "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
+        _status.value = "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
 }
