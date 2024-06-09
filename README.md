@@ -8,6 +8,13 @@
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
+## ⚔️ Story
+
+On one fine Monday, when the Android Studio suggested to update my AGP version from `7.x.x` to `8.0.0` I did it without checking the release note (my mistake 🤦‍♂️). My build wend `SUCCESSFULL` and I installed the app. Everything was fine and the tests also were looking great. To see measure the performance impact, i created a `R8` enabled build, and that's when things started going CRAZY. The app didn't crash, but the behaviour of the completely changed and was acting super weird . You do one thing, and something else happens (For eg: you click on something and the app gets logout). The confusing part was "why it works well in debug mode but only release mode looks weird", and the only difference I see in these two builds are R8. Curious enough, i jumped into the release note and saw this particular line
+
+
+
+
 > A tool to compare two APK files at dex level
 
 ### ✨ Demo
