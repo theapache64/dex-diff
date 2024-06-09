@@ -25,10 +25,6 @@ class SplashActivity : Activity() {
         App.di.inject(this)
 
         with(viewModel) {
-            welcomeMsg.observe {
-                println(it)
-            }
-
             goToHome.observe { shouldGo ->
                 if(shouldGo){
                     startActivity(
