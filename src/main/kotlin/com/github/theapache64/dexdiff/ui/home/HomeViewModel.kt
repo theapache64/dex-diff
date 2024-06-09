@@ -42,7 +42,7 @@ class HomeViewModel @Inject constructor(
         }
 
         _status.value = "➡️ Deleting old results..."
-        val isDebug = true
+        val isDebug = false
         if (!isDebug) {
             File("dex-diff-result").deleteRecursively()
         }
