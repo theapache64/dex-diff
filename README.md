@@ -6,7 +6,7 @@
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
-> A tool to compare two APK files at dex level
+> A tool to compare two APK files at the dex level. Useful for checking the impact of things like [fullMode](https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md#r8-full-mode) and [dex optimisations](https://developer.android.com/topic/performance/baselineprofiles/dex-layout-optimizations).
 
 ### ⌨️ Install
 ```bash
