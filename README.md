@@ -25,7 +25,7 @@ dex-diff before.apk after.apk [com.my.app.packageName]
 with-fullmode.apk    without-fullmode.apk
 
 ❯ dex-diff without-fullmode.apk with-fullmode.apk com.example.flowobjectrepro
-⚔️ dex-diff v0.0.5
+⚔️ dex-diff v0.0.6
 🚀 Initialising...
 ➡️ Deleting old results (dex-diff-result)...
 ✅ Deleted old results
