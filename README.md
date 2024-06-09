@@ -1,35 +1,62 @@
-![](cover.jpeg)
 
 # dex-diff
 
-![buildStatus](https://img.shields.io/github/workflow/status/theapache64/dex-diff/Java%20CI%20with%20Gradle?style=plastic)
 ![latestVersion](https://img.shields.io/github/v/release/theapache64/dex-diff)
 <a href="https://twitter.com/theapache64" target="_blank">
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
-## ⚔️ Story
-
-On one fine Monday, when the Android Studio suggested to update my AGP version from `7.x.x` to `8.0.0` I did it without checking the release note (my mistake 🤦‍♂️). My build wend `SUCCESSFULL` and I installed the app. Everything was fine and the tests also were looking great. To see measure the performance impact, i created a `R8` enabled build, and that's when things started going CRAZY. The app didn't crash, but the behaviour of the completely changed and was acting super weird . You do one thing, and something else happens (For eg: you click on something and the app gets logout). The confusing part was "why it works well in debug mode but only release mode looks weird", and the only difference I see in these two builds are R8. Curious enough, i jumped into the release note and saw this particular line
-
-
-
-
 > A tool to compare two APK files at dex level
 
-### ✨ Demo
+### ⌨️ Install
+```bash
+sudo npm install -g dex-diff
+```
 
-![](demo.gif)
+### ✨ Usage
+```bash
+dex-diff before.apk after.apk [com.my.app.packageName]
+```
 
-## 🦿 Prerequisites
+### 🤖 Example
 
-- Java 8 or above
+```bash
+❯ ls
+with-fullmode.apk    without-fullmode.apk
 
-## ⌨️ Usage
+❯ dex-diff without-fullmode.apk with-fullmode.apk com.example.flowobjectrepro
+⚔️ dex-diff v0.0.5
+🚀 Initialising...
+➡️ Deleting old results (dex-diff-result)...
+✅ Deleted old results
+➡️ Decompiling before APK... (this may take some time)
+✅ Decompiling before APK finished
+➡️ Decompiling after APK... (this may take some time)
+✅ Decompiling after APK finished
+✅ Decompile finished (6645ms)
+➡️ Comparing before and after... (this may take some time)
+✅ Comparing finished (2030ms)
+➡️ Making report...
+✅ Report ready (10.66s) -> file:///../dex-diff-result/report.html 
 
-1. Step 1
-1. Step 2
-1. Step 3
+```
+
+### 💻 Output
+
+**Summary**
+![image](https://github.com/theapache64/dex-diff/assets/9678279/4af3027b-8d26-42c2-ab0b-96789d05f059)
+
+**App files' addition, deletion, and removals**
+![image](https://github.com/theapache64/dex-diff/assets/9678279/e9e6b466-d599-4833-8fd6-1b30d9299c91)
+
+**Libary files' addition, deletion, and removals**
+![image](https://github.com/theapache64/dex-diff/assets/9678279/de89e79a-191b-4cec-9901-2160b0c893f5)
+
+**Framework files' addition, deletion, and removals**
+![image](https://github.com/theapache64/dex-diff/assets/9678279/f3dbd2bf-645b-451c-b4bd-063db3e86b89)
+
+**Change view**
+![image](https://github.com/theapache64/dex-diff/assets/9678279/b31f1e76-6a1f-4932-b3df-1a0fb2321512)
 
 
 ## ✍️ Author
