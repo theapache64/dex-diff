@@ -29,7 +29,7 @@ class App : Application() {
  * Entry point
  */
 fun main(args: Array<String>) {
-    println("⚔️ dex-diff v0.0.6")
+    println("⚔️ dex-diff v0.0.7")
     App.args = args
     App().onCreate()
 }

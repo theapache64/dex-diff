@@ -5,7 +5,7 @@
   "main": "index.js",
   "preferGlobal": "true",
   "repository": "https://github.com/theapache64/dex-diff",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "jdeploy": {
     "jdk": "false",
     "javaVersion": "17",
