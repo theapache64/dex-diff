@@ -11,7 +11,11 @@
     "javaVersion": "17",
     "jar": "dex-diff.main.jar",
     "javafx": "false",
-    "title": "dex-diff"
+    "title": "dex-diff",
+    "args": [
+      "-Xms4G",
+      "-Xmx8G"
+    ]
   },
   "dependencies": {
     "command-exists-promise": "^2.0.2",
