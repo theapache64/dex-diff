@@ -8,6 +8,7 @@ import com.github.theapache64.dexdiff.utils.ReportMaker
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
+import org.apache.commons.codec.digest.DigestUtils
 import java.io.File
 import javax.inject.Inject
 
@@ -44,7 +45,15 @@ class HomeViewModel @Inject constructor(
 
         val file = File("dex-diff-result")
 
+        val beforeMd5 = appArgs.beforeApk.calculateMd5()
+        val afterMd5 = appArgs.afterApk.calculateMd5()
 
+        if(beforeMd5 == afterMd5){
+            _status.value = "Before APK MD5: $beforeMd5"
+            _status.value = "After APK MD5: $afterMd5"
+            _status.value = "❌ Before and after APKs are same"
+            return
+        }
 
         val isDebug = false
         if (file.exists()) {
@@ -150,6 +159,10 @@ class HomeViewModel @Inject constructor(
         _status.value = "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
+}
+
+private fun File.calculateMd5(): String {
+    return DigestUtils.md5Hex(this.inputStream()).toString()
 }
 
 private fun <E> parseDexMeta(): DexMeta {

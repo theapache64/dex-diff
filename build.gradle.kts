@@ -40,6 +40,9 @@ dependencies {
     // Test deps
     testImplementation(kotlin("test"))
     testImplementation("com.github.theapache64:expekt:1.0.0")
+
+    // To calculate md5
+    implementation("commons-codec:commons-codec:1.17.0")
 }
 
 tasks.test {
