@@ -13,8 +13,8 @@
     "javafx": "false",
     "title": "dex-diff",
     "args": [
-      "-Xms4G",
-      "-Xmx8G"
+      "-Xms8G",
+      "-Xmx12G"
     ]
   },
   "dependencies": {

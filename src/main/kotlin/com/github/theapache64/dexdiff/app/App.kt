@@ -2,6 +2,7 @@ package com.github.theapache64.dexdiff.app
 
 import com.github.theapache64.dexdiff.ui.splash.SplashActivity
 import com.theapache64.cyclone.core.Application
+import kotlin.system.exitProcess
 
 
 /**
@@ -30,6 +31,9 @@ class App : Application() {
  */
 fun main(args: Array<String>) {
     println("⚔️ dex-diff v0.0.7")
+    val heapSize = Runtime.getRuntime().maxMemory() / 1024 / 1024
+    println("🧠 Heap size: $heapSize MB")
+
     App.args = args
     App().onCreate()
 }

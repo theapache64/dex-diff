@@ -34,6 +34,7 @@ class HomeViewModel @Inject constructor(
 
 
     fun init() {
+
         val analysisStarTime = System.currentTimeMillis()
         _status.value = INIT_MSG
         val appArgs = appRepo.args
@@ -42,6 +43,9 @@ class HomeViewModel @Inject constructor(
         }
 
         val file = File("dex-diff-result")
+
+
+
         val isDebug = false
         if (file.exists()) {
             if (!isDebug) {
