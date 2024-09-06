@@ -12,6 +12,8 @@ fun File.parsePackageName(): String {
 }
 
 class ReportMaker(
+    val reportFile : File,
+
     val apkFileDetails: String,
     val appPackages: List<String>,
     private val beforeApkSizeInKb: Int,
@@ -52,11 +54,8 @@ class ReportMaker(
 ) {
 
 
-    fun make(): File {
-        val reportFile = File("dex-diff-result/report.html").apply {
-            writeText("report_template.html".readAsResource())
-        }
-
+    fun write() {
+        reportFile.writeText("report_template.html".readAsResource())
         val frameworkNote =
             "These are files inside '${HomeViewModel.FRAMEWORK_PACKAGES.joinToString(", ")}' directory"
         val frameworkChangedNote =
@@ -121,8 +120,6 @@ class ReportMaker(
 
 
         reportFile.writeText(fullReport)
-
-        return reportFile
     }
 
     private fun String.addReportSummary(): String {

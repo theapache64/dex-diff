@@ -34,6 +34,9 @@ dependencies {
     // DiffUtils
     implementation("io.github.java-diff-utils:java-diff-utils:4.12")
 
+    // To calculate md5
+    implementation("commons-codec:commons-codec:1.17.0")
+
     // SL4J
     implementation("org.slf4j:slf4j-nop:2.0.7")
 
@@ -41,8 +44,6 @@ dependencies {
     testImplementation(kotlin("test"))
     testImplementation("com.github.theapache64:expekt:1.0.0")
 
-    // To calculate md5
-    implementation("commons-codec:commons-codec:1.17.0")
 }
 
 tasks.test {

@@ -1,5 +1,6 @@
 package com.github.theapache64.dexdiff.utils
 
+import com.github.theapache64.dexdiff.ui.home.calculateMd5
 import jadx.api.JadxArgs
 import jadx.api.JadxDecompiler
 import jadx.api.JavaClass
@@ -47,19 +48,33 @@ class ApkDecompiler(
     }
 
     fun decompile(): DecompileReport {
-        val decompiledDir = File("dex-diff-result/${apkFile.nameWithoutExtension}-${currentDateTime()}-decompiled")
-        val jadxArgs = JadxArgs()
-        jadxArgs.setInputFile(apkFile)
-        jadxArgs.outDir = decompiledDir
+        val dirName = apkFile.calculateMd5()
+        val decompiledDir = File("dex-diff-result/$dirName-decompiled")
+        val intsFile = decompiledDir.resolve("ints.txt")
+
         val totalClasses: Int
         val totalMethods: Int
 
-        JadxDecompiler(jadxArgs).use { jadx ->
-            jadx.load()
-            val (classesCount, methodsCount) = countClassesAndMethodsRecursively(jadx.classes)
-            totalClasses = classesCount
-            totalMethods = methodsCount
-            jadx.save()
+        if (decompiledDir.exists() && intsFile.exists()) {
+            println("🙌 decompiling ${apkFile.name} skipped as cache exist")
+            val (first, second) = intsFile.readText().split(",").map { it.trim().toInt() }
+            totalClasses = first
+            totalMethods = second
+        } else {
+            val jadxArgs = JadxArgs()
+            jadxArgs.setInputFile(apkFile)
+            jadxArgs.outDir = decompiledDir
+
+
+            JadxDecompiler(jadxArgs).use { jadx ->
+                jadx.load()
+                val (classesCount, methodsCount) = countClassesAndMethodsRecursively(jadx.classes)
+                totalClasses = classesCount
+                totalMethods = methodsCount
+                jadx.save()
+            }
+
+            save(data = arrayOf(totalClasses, totalMethods), intsFile)
         }
         val sourceDir = decompiledDir.resolve("sources")
         return DecompileReport(
@@ -69,6 +84,10 @@ class ApkDecompiler(
             totalClasses = totalClasses,
             totalMethods = totalMethods
         )
+    }
+
+    private fun save(data: Array<Int>, file: File) {
+        file.writeText(data.joinToString(separator = ", "))
     }
 
     private fun countClassesAndMethodsRecursively(classes: List<JavaClass>): Pair<Int, Int> {

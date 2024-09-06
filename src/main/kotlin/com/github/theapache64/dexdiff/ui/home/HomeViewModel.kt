@@ -5,6 +5,7 @@ import com.github.theapache64.dexdiff.data.repo.AppRepo
 import com.github.theapache64.dexdiff.models.createFileResult
 import com.github.theapache64.dexdiff.utils.ApkDecompiler
 import com.github.theapache64.dexdiff.utils.ReportMaker
+import com.github.theapache64.dexdiff.utils.readAsResource
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
@@ -43,40 +44,24 @@ class HomeViewModel @Inject constructor(
             "Arguments not found"
         }
 
-        val file = File("dex-diff-result")
-
         val beforeMd5 = appArgs.beforeApk.calculateMd5()
         val afterMd5 = appArgs.afterApk.calculateMd5()
 
-        if(beforeMd5 == afterMd5){
+        if (beforeMd5 == afterMd5) {
+            // aah.. user made a mistake
             _status.value = "Before APK MD5: $beforeMd5"
             _status.value = "After APK MD5: $afterMd5"
             _status.value = "❌ Before and after APKs are same"
             return
         }
 
-        val isDebug = false
-        if (file.exists()) {
-            if (!isDebug) {
-                _status.value = "➡️ Deleting old results (${file.name})..."
-                file.deleteRecursively()
-                _status.value = "✅ Deleted old results"
-            }
-        }
+
         _status.value = "➡️ Decompiling before APK... (this may take some time)"
         var startTime = System.currentTimeMillis()
-        val beforeReport = if (isDebug) {
-            ApkDecompiler(appArgs.beforeApk).cachedBefore()
-        } else {
-            ApkDecompiler(appArgs.beforeApk).decompile()
-        }
+        val beforeReport = ApkDecompiler(appArgs.beforeApk).decompile()
         _status.value = "✅ Decompiling before APK finished"
         _status.value = "➡️ Decompiling after APK... (this may take some time)"
-        val afterReport = if (isDebug) {
-            ApkDecompiler(appArgs.afterApk).cachedAfter()
-        } else {
-            ApkDecompiler(appArgs.afterApk).decompile()
-        }
+        val afterReport = ApkDecompiler(appArgs.afterApk).decompile()
         _status.value = "✅ Decompiling after APK finished"
         _status.value = "✅ Decompile finished (${System.currentTimeMillis() - startTime}ms)"
 
@@ -108,65 +93,70 @@ class HomeViewModel @Inject constructor(
         val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
         val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
-        _status.value = "✅ Comparing finished (${System.currentTimeMillis() - startTime}ms)"
+        val reportFile = File("dex-diff-result/${beforeMd5}_${afterMd5}_report.html")
 
-        _status.value = "➡️ Making report..."
-        val reportFile = ReportMaker(
-            apkFileDetails = """
+        if (reportFile.exists()) {
+            println("🙌 skipping new report file generation as cache exist")
+        } else {
+
+            _status.value = "✅ Comparing finished (${System.currentTimeMillis() - startTime}ms)"
+            _status.value = "➡️ Making report..."
+
+            ReportMaker(
+                reportFile = reportFile,
+                apkFileDetails = """
                 Before: <code>${appArgs.beforeApk.name}</code> </br> 
                 After: <code>${appArgs.afterApk.name}</code> </br> 
                 App path: <code> ${appArgs.appPackages.joinToString(separator = ",")}</code>
             """.trimIndent(),
-            appPackages = appArgs.appPackages,
-            beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
-            afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
+                appPackages = appArgs.appPackages,
+                beforeApkSizeInKb = (appArgs.beforeApk.length() / 1024).toInt(),
+                afterApkSizeInKb = (appArgs.afterApk.length() / 1024).toInt(),
 
-            beforeFilesCount = beforeFiles.size,
-            afterFilesCount = afterFiles.size,
+                beforeFilesCount = beforeFiles.size,
+                afterFilesCount = afterFiles.size,
 
-            beforeAppFilesCount = beforeAppFiles.size,
-            afterAppFilesCount = afterAppFiles.size,
+                beforeAppFilesCount = beforeAppFiles.size,
+                afterAppFilesCount = afterAppFiles.size,
 
-            beforeFrameworkFilesCount = beforeTotalFrameworkFiles,
-            afterFrameworkFilesCount = afterTotalFrameworkFiles,
+                beforeFrameworkFilesCount = beforeTotalFrameworkFiles,
+                afterFrameworkFilesCount = afterTotalFrameworkFiles,
 
-            beforeLibraryFilesCount = beforeTotalLibraryFiles,
-            afterLibraryFilesCount = afterTotalLibraryFiles,
+                beforeLibraryFilesCount = beforeTotalLibraryFiles,
+                afterLibraryFilesCount = afterTotalLibraryFiles,
 
 
-            beforeTotalClasses = beforeReport.totalClasses,
-            afterTotalClasses = afterReport.totalClasses,
+                beforeTotalClasses = beforeReport.totalClasses,
+                afterTotalClasses = afterReport.totalClasses,
 
-            beforeTotalMethods = beforeReport.totalMethods,
-            afterTotalMethods = afterReport.totalMethods,
+                beforeTotalMethods = beforeReport.totalMethods,
+                afterTotalMethods = afterReport.totalMethods,
 
-            newAppFiles = filesResult.newAppFiles,
-            removedAppFiles = filesResult.removedAppFiles,
-            changedAppFiles = changedAppFiles,
+                newAppFiles = filesResult.newAppFiles,
+                removedAppFiles = filesResult.removedAppFiles,
+                changedAppFiles = changedAppFiles,
 
-            newFrameworkFiles = filesResult.newFrameworkFiles,
-            removedFrameworkFiles = filesResult.removedFrameworkFiles,
-            changedFrameworkFiles = filesResult.changedFrameworkFiles,
+                newFrameworkFiles = filesResult.newFrameworkFiles,
+                removedFrameworkFiles = filesResult.removedFrameworkFiles,
+                changedFrameworkFiles = filesResult.changedFrameworkFiles,
 
-            newLibraryFiles = filesResult.newLibraryFiles,
-            removedLibraryFiles = filesResult.removedLibraryFiles,
-            changedLibraryFiles = filesResult.changedLibraryFiles,
+                newLibraryFiles = filesResult.newLibraryFiles,
+                removedLibraryFiles = filesResult.removedLibraryFiles,
+                changedLibraryFiles = filesResult.changedLibraryFiles,
 
-            beforeDexMeta = filesResult.beforeDexMeta,
-            afterDexMeta = filesResult.afterDexMeta,
-        ).make()
+                beforeDexMeta = filesResult.beforeDexMeta,
+                afterDexMeta = filesResult.afterDexMeta,
+            ).write()
+        }
 
-        _status.value = "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
+        _status.value =
+            "✅ Report ready (${((System.currentTimeMillis() - analysisStarTime) / 1000f).roundToTwoDecimals()}s) -> file://${reportFile.absolutePath} "
     }
 
 }
 
-private fun File.calculateMd5(): String {
+fun File.calculateMd5(): String {
     return DigestUtils.md5Hex(this.inputStream()).toString()
-}
-
-private fun <E> parseDexMeta(): DexMeta {
-    TODO("Not yet implemented")
 }
 
 
