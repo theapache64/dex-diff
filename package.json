@@ -14,7 +14,7 @@
     "title": "dex-diff",
     "args": [
       "-Xms8G",
-      "-Xmx12G"
+      "-Xmx8G"
     ]
   },
   "dependencies": {
