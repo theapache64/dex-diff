@@ -6,6 +6,9 @@ import com.github.theapache64.dexdiff.data.local.DexMeta
 import com.github.theapache64.dexdiff.ui.home.HomeViewModel
 import com.github.theapache64.dexdiff.utils.DecompileReport
 import com.github.theapache64.dexdiff.utils.readAsResource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.nio.file.Files
 
@@ -39,15 +42,17 @@ data class FilesResult(
 )
 
 
-fun createFileResult(
+suspend fun createFileResult(
     appPackages: List<String>,
     beforeReport: DecompileReport,
     afterReport: DecompileReport
-): FilesResult {
+): FilesResult = withContext(Dispatchers.IO) {
     val afterSrcDirName = afterReport.sourceDir.generatedDirName()
 
-    val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
-    val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
+    val beforeFilesJob = async { beforeReport.sourceDir.walk().toList().filter { it.isFile } }
+    val afterFilesJob = async { afterReport.sourceDir.walk().toList().filter { it.isFile } }
+    val beforeFiles = beforeFilesJob.await()
+    val afterFiles = afterFilesJob.await()
 
     val newFiles = mutableListOf<File>()
     val removedFiles = mutableListOf<File>()
@@ -73,57 +78,63 @@ fun createFileResult(
     val beforeDexMeta = mutableMapOf<String, DexMeta>()
     val afterDexMeta = mutableMapOf<String, DexMeta>()
 
-
     // before files loop
-    fileLooper(
-        appPackages = appPackages,
-        afterSrcDirName = afterSrcDirName,
-        sourceList = beforeFiles,
-        dexMeta = beforeDexMeta,
-        targetList = afterFiles,
+    val beforeFilesLoopJob = async {
+        fileLooper(
+            appPackages = appPackages,
+            afterSrcDirName = afterSrcDirName,
+            sourceList = beforeFiles,
+            dexMeta = beforeDexMeta,
+            targetList = afterFiles,
 
-        newOrRemovedFiles = removedFiles,
+            newOrRemovedFiles = removedFiles,
 
-        newAppFiles = null,
-        beforeOrAfterAppFiles = beforeAppFiles,
-        changedAppFiles = changedAppFiles,
-        removedAppFiles = removedAppFiles,
+            newAppFiles = null,
+            beforeOrAfterAppFiles = beforeAppFiles,
+            changedAppFiles = changedAppFiles,
+            removedAppFiles = removedAppFiles,
 
-        newLibraryFiles = null,
-        beforeOrAfterLibraryFiles = beforeLibraryFiles,
-        changedLibraryFiles = changedLibraryFiles,
-        removedLibraryFiles = removedLibraryFiles,
+            newLibraryFiles = null,
+            beforeOrAfterLibraryFiles = beforeLibraryFiles,
+            changedLibraryFiles = changedLibraryFiles,
+            removedLibraryFiles = removedLibraryFiles,
 
-        newFrameworkFiles = null,
-        beforeOrAfterFrameworkFiles = beforeFrameworkFiles,
-        changedFrameworkFiles = changedFrameworkFiles,
-        removedFrameworkFiles = removedFrameworkFiles,
-    )
+            newFrameworkFiles = null,
+            beforeOrAfterFrameworkFiles = beforeFrameworkFiles,
+            changedFrameworkFiles = changedFrameworkFiles,
+            removedFrameworkFiles = removedFrameworkFiles,
+        )
+    }
 
     // after files loop
-    fileLooper(
-        appPackages = appPackages,
-        afterSrcDirName = afterSrcDirName,
-        sourceList = afterFiles,
-        dexMeta = afterDexMeta,
-        targetList = beforeFiles,
-        newOrRemovedFiles = newFiles,
+    val afterFilesLoopJob = async {
+        fileLooper(
+            appPackages = appPackages,
+            afterSrcDirName = afterSrcDirName,
+            sourceList = afterFiles,
+            dexMeta = afterDexMeta,
+            targetList = beforeFiles,
+            newOrRemovedFiles = newFiles,
 
-        newAppFiles = newAppFiles,
-        removedAppFiles = null,
-        beforeOrAfterAppFiles = afterAppFiles,
-        changedAppFiles = null,
+            newAppFiles = newAppFiles,
+            removedAppFiles = null,
+            beforeOrAfterAppFiles = afterAppFiles,
+            changedAppFiles = null,
 
-        newLibraryFiles = newLibraryFiles,
-        removedLibraryFiles = null,
-        beforeOrAfterLibraryFiles = afterLibraryFiles,
-        changedLibraryFiles = null,
+            newLibraryFiles = newLibraryFiles,
+            removedLibraryFiles = null,
+            beforeOrAfterLibraryFiles = afterLibraryFiles,
+            changedLibraryFiles = null,
 
-        newFrameworkFiles = newFrameworkFiles,
-        removedFrameworkFiles = null,
-        beforeOrAfterFrameworkFiles = afterFrameworkFiles,
-        changedFrameworkFiles = null,
-    )
+            newFrameworkFiles = newFrameworkFiles,
+            removedFrameworkFiles = null,
+            beforeOrAfterFrameworkFiles = afterFrameworkFiles,
+            changedFrameworkFiles = null,
+        )
+    }
+
+    beforeFilesLoopJob.await()
+    afterFilesLoopJob.await()
 
     // Verifying data
     val expectedBeforeFilesCount = beforeLibraryFiles.size + beforeAppFiles.size + beforeFrameworkFiles.size
@@ -137,15 +148,22 @@ fun createFileResult(
     ) { "After files count mismatch: Expected: $expectedAfterFilesCount, Actual: ${afterFiles.size}" }
 
     // Set .dex file size
-    beforeDexMeta.forEach { (dexFileName, dexMeta) ->
-        dexMeta.sizeInKb = beforeReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+    val beforeDexMetaJob = async {
+        beforeDexMeta.forEach { (dexFileName, dexMeta) ->
+            dexMeta.sizeInKb = beforeReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+        }
     }
 
-    afterDexMeta.forEach { (dexFileName, dexMeta) ->
-        dexMeta.sizeInKb = afterReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+    val afterDexMetaJob = async {
+        afterDexMeta.forEach { (dexFileName, dexMeta) ->
+            dexMeta.sizeInKb = afterReport.decompiledDir.resolve("resources/$dexFileName").length().toInt() / 1024
+        }
     }
 
-    return FilesResult(
+    beforeDexMetaJob.await()
+    afterDexMetaJob.await()
+
+    FilesResult(
         beforeFiles = beforeFiles,
         afterFiles = afterFiles,
         newFiles = newFiles,

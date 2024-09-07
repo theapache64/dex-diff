@@ -5,6 +5,7 @@ import com.github.theapache64.dexdiff.data.local.AppArgs
 import com.github.theapache64.dexdiff.ui.splash.SplashViewModel
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 class HomeActivity : Activity() {
@@ -27,6 +28,8 @@ class HomeActivity : Activity() {
             println(msg)
         }
 
-        viewModel.init()
+        runBlocking {
+            viewModel.init()
+        }
     }
 }

@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
     val status: LiveData<String> = _status
 
 
-    fun init() {
+    suspend fun init() {
 
         val analysisStarTime = System.currentTimeMillis()
         _status.value = INIT_MSG
@@ -66,8 +66,11 @@ class HomeViewModel @Inject constructor(
         _status.value = "✅ Decompile finished (${System.currentTimeMillis() - startTime}ms)"
 
         startTime = System.currentTimeMillis()
-
+        val isDebug = true
         val reportFile = File("dex-diff-result/${beforeMd5}_${afterMd5}_report.html")
+        if(isDebug){
+            reportFile.delete()
+        }
 
         if (reportFile.exists()) {
             println("🙌 skipping new report file generation as cache exist")

@@ -40,6 +40,9 @@ dependencies {
     // SL4J
     implementation("org.slf4j:slf4j-nop:2.0.7")
 
+    // Coroutine core
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+
     // Test deps
     testImplementation(kotlin("test"))
     testImplementation("com.github.theapache64:expekt:1.0.0")
