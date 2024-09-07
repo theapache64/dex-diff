@@ -65,39 +65,40 @@ class HomeViewModel @Inject constructor(
         _status.value = "✅ Decompiling after APK finished"
         _status.value = "✅ Decompile finished (${System.currentTimeMillis() - startTime}ms)"
 
-
         startTime = System.currentTimeMillis()
-        _status.value = "➡️ Comparing before and after... (this may take some time)"
-        val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
-        val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
-        val filesResult = createFileResult(
-            appPackages = appArgs.appPackages,
-            beforeReport = beforeReport,
-            afterReport = afterReport
-        )
-
-        // app files
-        val beforeAppFiles = filesResult.beforeAppFiles
-        val afterAppFiles = filesResult.afterAppFiles
-        val changedAppFiles = filesResult.changedAppFiles
-
-        // library files
-        val beforeLibraryFiles = filesResult.beforeLibraryFiles
-        val afterLibraryFiles = filesResult.afterLibraryFiles
-        val beforeTotalLibraryFiles = beforeLibraryFiles.size
-        val afterTotalLibraryFiles = afterLibraryFiles.size
-
-        // framework files
-        val beforeFrameworkFiles = filesResult.beforeFrameworkFiles
-        val afterFrameworkFiles = filesResult.afterFrameworkFiles
-        val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
-        val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
         val reportFile = File("dex-diff-result/${beforeMd5}_${afterMd5}_report.html")
 
         if (reportFile.exists()) {
             println("🙌 skipping new report file generation as cache exist")
         } else {
+
+            _status.value = "➡️ Comparing before and after... (this may take some time)"
+
+            val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
+            val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
+            val filesResult = createFileResult(
+                appPackages = appArgs.appPackages,
+                beforeReport = beforeReport,
+                afterReport = afterReport
+            )
+
+            // app files
+            val beforeAppFiles = filesResult.beforeAppFiles
+            val afterAppFiles = filesResult.afterAppFiles
+            val changedAppFiles = filesResult.changedAppFiles
+
+            // library files
+            val beforeLibraryFiles = filesResult.beforeLibraryFiles
+            val afterLibraryFiles = filesResult.afterLibraryFiles
+            val beforeTotalLibraryFiles = beforeLibraryFiles.size
+            val afterTotalLibraryFiles = afterLibraryFiles.size
+
+            // framework files
+            val beforeFrameworkFiles = filesResult.beforeFrameworkFiles
+            val afterFrameworkFiles = filesResult.afterFrameworkFiles
+            val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
+            val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
             _status.value = "✅ Comparing finished (${System.currentTimeMillis() - startTime}ms)"
             _status.value = "➡️ Making report..."

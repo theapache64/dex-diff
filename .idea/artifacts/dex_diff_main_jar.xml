@@ -46,6 +46,7 @@
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.7.10/d2abf9e77736acc4450dc4a3f707fa2c10f5099d/kotlin-stdlib-1.7.10.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.android.tools.smali/smali-baksmali/3.0.5/4db4d2b2f0bcffee02d5b72fdb5b4079d8170eed/smali-baksmali-3.0.5.jar" path-in-jar="/" />
       <element id="extracted-dir" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/3.25.3/d3200261955f3298e0d85c9892201e70492ce8eb/protobuf-java-3.25.3.jar" path-in-jar="/" />
+      <element id="dir-copy" path="$PROJECT_DIR$/src/main/resources" />
     </root>
   </artifact>
 </component>
