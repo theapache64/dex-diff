@@ -106,7 +106,7 @@ suspend fun createFileResult(
             changedFrameworkFiles = changedFrameworkFiles,
             removedFrameworkFiles = removedFrameworkFiles,
         )
-        println("QuickTag: :createFileResult: beforeFilesLoopJob: done")
+        
     }
 
     // after files loop
@@ -135,7 +135,7 @@ suspend fun createFileResult(
             changedFrameworkFiles = null,
         )
 
-        println("QuickTag: :createFileResult: afterFilesLoopJob: done")
+        
     }
 
     beforeFilesLoopJob.await()
@@ -220,7 +220,7 @@ private fun fileLooper(
     changedFrameworkFiles: MutableList<ChangedFile>? = null,
     dexMeta: MutableMap<String, DexMeta>
 ) {
-    println("QuickTag: :fileLooper: processing: ${sourceList.size} files")
+    
     sourceList.forEach { sourceFile ->
 
         val dexList = sourceFile.readText().split("/* loaded from: ")

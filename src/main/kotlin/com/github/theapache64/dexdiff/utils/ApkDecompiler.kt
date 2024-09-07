@@ -84,9 +84,7 @@ class ApkDecompiler(
             totalFiles = sourceDir.walk().toList().filter { it.isFile }.size,
             totalClasses = totalClasses,
             totalMethods = totalMethods
-        ).also {
-            println("✅ Decompiled: ${apkFile.name}")
-        }
+        )
     }
 
     private fun save(data: Array<Int>, file: File) {
