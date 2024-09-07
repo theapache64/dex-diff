@@ -30,7 +30,7 @@ class App : Application() {
  * Entry point
  */
 fun main(args: Array<String>) {
-    println("⚔️ dex-diff v0.1.2")
+    println("⚔️ dex-diff v0.1.4")
     val heapSize = Runtime.getRuntime().maxMemory() / 1024 / 1024
     println("🧠 Heap size: $heapSize MB")
     App.args = args

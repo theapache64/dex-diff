@@ -46,13 +46,12 @@ suspend fun createFileResult(
     appPackages: List<String>,
     beforeReport: DecompileReport,
     afterReport: DecompileReport
-): FilesResult = withContext(Dispatchers.IO) {
+): FilesResult = withContext(Dispatchers.Default) {
     val afterSrcDirName = afterReport.sourceDir.generatedDirName()
 
     val beforeFilesJob = async { beforeReport.sourceDir.walk().toList().filter { it.isFile } }
     val afterFilesJob = async { afterReport.sourceDir.walk().toList().filter { it.isFile } }
-    val beforeFiles = beforeFilesJob.await()
-    val afterFiles = afterFilesJob.await()
+
 
     val newFiles = mutableListOf<File>()
     val removedFiles = mutableListOf<File>()
@@ -77,6 +76,9 @@ suspend fun createFileResult(
 
     val beforeDexMeta = mutableMapOf<String, DexMeta>()
     val afterDexMeta = mutableMapOf<String, DexMeta>()
+
+    val beforeFiles = beforeFilesJob.await()
+    val afterFiles = afterFilesJob.await()
 
     // before files loop
     val beforeFilesLoopJob = async {
@@ -104,6 +106,7 @@ suspend fun createFileResult(
             changedFrameworkFiles = changedFrameworkFiles,
             removedFrameworkFiles = removedFrameworkFiles,
         )
+        println("QuickTag: :createFileResult: beforeFilesLoopJob: done")
     }
 
     // after files loop
@@ -131,6 +134,8 @@ suspend fun createFileResult(
             beforeOrAfterFrameworkFiles = afterFrameworkFiles,
             changedFrameworkFiles = null,
         )
+
+        println("QuickTag: :createFileResult: afterFilesLoopJob: done")
     }
 
     beforeFilesLoopJob.await()
@@ -215,6 +220,7 @@ private fun fileLooper(
     changedFrameworkFiles: MutableList<ChangedFile>? = null,
     dexMeta: MutableMap<String, DexMeta>
 ) {
+    println("QuickTag: :fileLooper: processing: ${sourceList.size} files")
     sourceList.forEach { sourceFile ->
 
         val dexList = sourceFile.readText().split("/* loaded from: ")

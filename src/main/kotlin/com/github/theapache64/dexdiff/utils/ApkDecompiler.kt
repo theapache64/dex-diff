@@ -4,6 +4,7 @@ import com.github.theapache64.dexdiff.ui.home.calculateMd5
 import jadx.api.JadxArgs
 import jadx.api.JadxDecompiler
 import jadx.api.JavaClass
+import jadx.core.dex.visitors.SaveCode.save
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -83,7 +84,9 @@ class ApkDecompiler(
             totalFiles = sourceDir.walk().toList().filter { it.isFile }.size,
             totalClasses = totalClasses,
             totalMethods = totalMethods
-        )
+        ).also {
+            println("✅ Decompiled: ${apkFile.name}")
+        }
     }
 
     private fun save(data: Array<Int>, file: File) {

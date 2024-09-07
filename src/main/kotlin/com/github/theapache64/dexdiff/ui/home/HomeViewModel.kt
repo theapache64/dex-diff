@@ -9,6 +9,9 @@ import com.github.theapache64.dexdiff.utils.readAsResource
 import com.github.theapache64.dexdiff.utils.roundToTwoDecimals
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import org.apache.commons.codec.digest.DigestUtils
 import java.io.File
 import javax.inject.Inject
@@ -35,7 +38,7 @@ class HomeViewModel @Inject constructor(
     val status: LiveData<String> = _status
 
 
-    suspend fun init() {
+    suspend fun init() = withContext(Dispatchers.Default) {
 
         val analysisStarTime = System.currentTimeMillis()
         _status.value = INIT_MSG
@@ -52,23 +55,22 @@ class HomeViewModel @Inject constructor(
             _status.value = "Before APK MD5: $beforeMd5"
             _status.value = "After APK MD5: $afterMd5"
             _status.value = "❌ Before and after APKs are same"
-            return
+            return@withContext
         }
 
-
-        _status.value = "➡️ Decompiling before APK... (this may take some time)"
+        _status.value = "➡️ Decompiling APKs... (this may take some time)"
         var startTime = System.currentTimeMillis()
-        val beforeReport = ApkDecompiler(appArgs.beforeApk).decompile()
-        _status.value = "✅ Decompiling before APK finished"
-        _status.value = "➡️ Decompiling after APK... (this may take some time)"
-        val afterReport = ApkDecompiler(appArgs.afterApk).decompile()
-        _status.value = "✅ Decompiling after APK finished"
-        _status.value = "✅ Decompile finished (${System.currentTimeMillis() - startTime}ms)"
+        val beforeReportJob = async { ApkDecompiler(appArgs.beforeApk).decompile() }
+        val afterReportJob = async { ApkDecompiler(appArgs.afterApk).decompile() }
+        val beforeReport = beforeReportJob.await()
+        val afterReport = afterReportJob.await()
+        _status.value =
+            "✅ Decompile finished (${((System.currentTimeMillis() - startTime) / 1000f).roundToTwoDecimals()}s)"
 
         startTime = System.currentTimeMillis()
         val isDebug = true
         val reportFile = File("dex-diff-result/${beforeMd5}_${afterMd5}_report.html")
-        if(isDebug){
+        if (isDebug) {
             reportFile.delete()
         }
 
@@ -78,8 +80,7 @@ class HomeViewModel @Inject constructor(
 
             _status.value = "➡️ Comparing before and after... (this may take some time)"
 
-            val beforeFiles = beforeReport.sourceDir.walk().toList().filter { it.isFile }
-            val afterFiles = afterReport.sourceDir.walk().toList().filter { it.isFile }
+
             val filesResult = createFileResult(
                 appPackages = appArgs.appPackages,
                 beforeReport = beforeReport,
@@ -103,8 +104,16 @@ class HomeViewModel @Inject constructor(
             val beforeTotalFrameworkFiles = beforeFrameworkFiles.size
             val afterTotalFrameworkFiles = afterFrameworkFiles.size
 
-            _status.value = "✅ Comparing finished (${System.currentTimeMillis() - startTime}ms)"
+            _status.value =
+                "✅ Comparing finished (${((System.currentTimeMillis() - startTime) / 1000f).roundToTwoDecimals()}s)"
             _status.value = "➡️ Making report..."
+
+            val beforeFilesJob = async { beforeReport.sourceDir.walk().toList().filter { it.isFile } }
+            val afterFilesJob = async { afterReport.sourceDir.walk().toList().filter { it.isFile } }
+
+
+            val beforeFiles = beforeFilesJob.await()
+            val afterFiles = afterFilesJob.await()
 
             ReportMaker(
                 reportFile = reportFile,
