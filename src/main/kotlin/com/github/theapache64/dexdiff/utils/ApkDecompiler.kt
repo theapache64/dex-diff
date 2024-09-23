@@ -1,6 +1,7 @@
 package com.github.theapache64.dexdiff.utils
 
 import com.github.theapache64.dexdiff.ui.home.calculateMd5
+import jadx.api.CommentsLevel
 import jadx.api.JadxArgs
 import jadx.api.JadxDecompiler
 import jadx.api.JavaClass
@@ -63,6 +64,7 @@ class ApkDecompiler(
             totalMethods = second
         } else {
             val jadxArgs = JadxArgs()
+            jadxArgs.isShowInconsistentCode = true
             jadxArgs.setInputFile(apkFile)
             jadxArgs.outDir = decompiledDir
 
